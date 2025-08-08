@@ -2,6 +2,8 @@
   function onDrop(type, recordlink) {
     if (type === "npcs" && isVehicle(recordlink.value)) {
       api.setValue("data.activeVehicle", [recordlink.value]);
+    } else if (type === "abilities") {
+      onDropAbility(type, recordLink);
     }
   }
 
@@ -11,6 +13,16 @@
 
   function isVehicle(value) {
     return value?.data?.type === "vehicle";
+  }
+
+  function onDropAbility(type, recordLink) {
+    const abilityName = recordLink.tooltip;
+    const abilityObj = { ...recordLink.value, icon: "IconWand" };
+
+    api.addValue("data.abilities", abilityObj, () => {
+      const valuesToSet = {};
+      api.setValues(valuesToSet);
+    });
   }
 </script>
 
@@ -84,22 +96,29 @@
     </list>
   </div>
 
-  <label
-    size="md"
-    variant="bold"
-    label="Signature Abilities"
-    textalign="center"
-  ></label>
+  <box field="specTrees" hidden="true">
+    <label
+      size="md"
+      variant="bold"
+      label="Signature Abilities"
+      textalign="center"
+    ></label>
 
-  <div
-    style="display: flex; flex-direction: column; margin-top: 8px; flex-grow: 1"
-  >
-    <list
-      listtype="character_specialization_action_list"
-      field="specializations"
+    <div
+      style="
+        display: flex;
+        flex-direction: column;
+        margin-top: 8px;
+        flex-grow: 1;
+      "
     >
-    </list>
-  </div>
+      <list
+        listtype="character_specialization_action_list"
+        field="specializations"
+      >
+      </list>
+    </div>
+  </box>
 
   <label
     size="md"
@@ -119,21 +138,12 @@
     </list>
   </div>
 
-  <label
-    size="md"
-    variant="bold"
-    label="Force Powers"
-    textalign="center"
-  ></label>
+  <label size="md" variant="bold" label="Abilities" textalign="center"></label>
 
   <div
     style="display: flex; flex-direction: column; margin-top: 8px; flex-grow: 1"
   >
-    <list
-      listtype="character_force_power_action_list"
-      variant="striped"
-      field="forcePowers"
-    >
+    <list listtype="character_ability_list" variant="striped" field="abilities">
     </list>
   </div>
 </div>

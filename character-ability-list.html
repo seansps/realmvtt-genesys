@@ -1,8 +1,8 @@
 <script>
   function onUseAbility() {
-    const forcePowerDataPath = getNearestParentDataPath(dataPath);
-    const forcePower = api.getValue(forcePowerDataPath);
-    useAbility(record, forcePower);
+    const abilityDataPath = getNearestParentDataPath(dataPath);
+    const ability = api.getValue(abilityDataPath);
+    useAbility(record, ability);
   }
 </script>
 
@@ -19,7 +19,7 @@
       width="100%"
       variant="unstyled"
       bold="true"
-      placeholder="Force Power Name..."
+      placeholder="Ability Name..."
     ></namefield>
     <div style="min-width: 50px">
       <button

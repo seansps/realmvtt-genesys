@@ -62,17 +62,6 @@
     onConditionChange(record, deletedItem);
   }
 
-  function updateForceRating() {
-    const baseForceRating = parseInt(record?.data?.forceRating || "0", 10);
-    const committedForce = parseInt(record?.data?.committedForce || "0", 10);
-    const remainingForce = Math.max(0, baseForceRating - committedForce);
-
-    api.setValues({
-      "data.totalForceRating": baseForceRating,
-      "data.remainingForce": remainingForce,
-    });
-  }
-
   function onLoadNPC() {
     // Show/hide fields based on type
     showHideFields(() => {
@@ -187,23 +176,6 @@
         )
           .toLowerCase()
           .includes("active");
-      }
-    });
-
-    // Set values for force powers if needed
-    const forcePowers = record?.data?.features || [];
-    forcePowers.forEach((forcePower, index) => {
-      if (
-        forcePower?.recordType === "force_powers" &&
-        forcePower?.fields?.abilityPortrait?.hidden === undefined
-      ) {
-        fieldsToSet[
-          `data.features.${index}.fields.abilityPortrait.hidden`
-        ] = false;
-        fieldsToSet[
-          `data.features.${index}.fields.customAbility.hidden`
-        ] = true;
-        fieldsToSet[`data.features.${index}.data.isForcePower`] = true;
       }
     });
 
