@@ -2,7 +2,7 @@
   function onUseAbility() {
     const abilityDataPath = getNearestParentDataPath(dataPath);
     const ability = api.getValue(abilityDataPath);
-    useAbility(record, ability);
+    useAbility(record, ability, abilityDataPath);
   }
 </script>
 

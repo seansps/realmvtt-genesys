@@ -1747,7 +1747,7 @@ function rollInitiative(record) {
   );
 }
 
-function useAbility(record, ability) {
+function useAbility(record, ability, dataPathToAbility) {
   const abilityName = ability.name;
   const portrait = ability.portrait;
   const description = ability.data?.description || "";
@@ -1772,17 +1772,13 @@ function useAbility(record, ability) {
   let type =
     ability.recordType === "signature_abilities"
       ? "Signature Ability"
-      : "Force Power";
+      : "Ability";
   if (ability.recordType === "talents") {
     type = "Active Talent";
   }
   if (ability.recordType === "records") {
     // An NPC ability
     type = "Ability";
-  }
-  // If isForcePower is set, set type accordingly
-  if (ability.data?.isForcePower !== undefined) {
-    type = ability.data?.isForcePower ? "Force Power" : "Ability";
   }
 
   const tags = [
@@ -1792,7 +1788,7 @@ function useAbility(record, ability) {
     },
   ];
 
-  if (type === "Force Power" || type === "Signature Ability") {
+  if (type === "Signature Ability") {
     // Add details on upgrades to the description
     const upgrades = ability.data?.talents || [];
     let upgradesText = upgrades
@@ -1809,6 +1805,14 @@ function useAbility(record, ability) {
     if (upgradesText) {
       abilityText += `\n\nUpgrades:\n${upgradesText}`;
     }
+  }
+
+  // Get effect macros
+  let effects =
+    api.getValueOnRecord(record, `${dataPathToAbility}.data.effects`) || [];
+  const effectMacros = getEffectMacros(effects);
+  if (effectMacros) {
+    abilityText += `\n\n${effectMacros}`;
   }
 
   api.sendMessage(abilityText, undefined, [], tags);
@@ -1837,55 +1841,31 @@ function useAbility(record, ability) {
       return;
     }
 
-    rollSkill(
-      record,
-      skill,
-      {
-        difficulty: difficulty,
-      },
-      ability
-    );
-  }
-
-  // Check for forcePowerBonus mods
-  const forcePowerBonuses = getEffectsAndModifiersForToken(
-    record,
-    ["forcePowerBonus"],
-    ability.name
-  );
-
-  // If forcePower, roll force power
-  if (type === "Force Power") {
-    // Get the number of remaining force dice (total -committed)
-    const totalForceDice = record?.data?.remainingForce || 0;
-    if (totalForceDice <= 0) {
-      api.showNotification(
-        `No force dice are available to use this power.`,
-        "red",
-        "No Force Dice"
-      );
+    // Check if this is an attack
+    const isAttack =
+      ability.data?.damage !== undefined && ability.data?.damage > 0;
+    if (isAttack && dataPathToAbility) {
+      rollAttack(record, ability, dataPathToAbility, "attack");
     } else {
-      api.promptRoll(
-        `${ability.name} Force Power Roll`,
-        `${totalForceDice} force`,
-        forcePowerBonuses,
+      rollSkill(
+        record,
+        skill,
         {
-          tooltip: `Force Power Roll for ${ability.name}`,
-          rollName: `Force Power`,
+          difficulty: difficulty,
         },
-        "force"
+        ability
       );
-    }
-  }
 
-  // Check for animation
-  const animation = ability.data?.animation;
-  if (animation) {
-    const ourToken = api.getToken();
-    const targets = api.getTargets();
-    const targetId = targets[0]?.token?._id;
-    if (ourToken) {
-      api.playAnimation(animation, ourToken._id, targetId);
+      // Check for animation
+      const animation = ability.data?.animation;
+      if (animation) {
+        const ourToken = api.getToken();
+        const targets = api.getTargets();
+        const targetId = targets[0]?.token?._id;
+        if (ourToken) {
+          api.playAnimation(animation, ourToken._id, targetId);
+        }
+      }
     }
   }
 }
@@ -2138,7 +2118,7 @@ function rollAttack(
   scale = "personal"
 ) {
   const isMelee = weapon.data?.type === "melee weapon";
-  let skill = weapon.data?.weaponSkill || "";
+  let skill = weapon.data?.weaponSkill || weapon.data?.skillCheck || "";
   if (skill === "") {
     skill = isMelee ? "Brawl" : "Ranged (Light)";
   }
@@ -2779,11 +2759,11 @@ function getEffectMacros(effects) {
         effectButtons += "\n";
       }
       effectButtons += `\`\`\`${effectTitle}
-    let targets = api.getSelectedOrDroppedToken();
-    targets.forEach(target => {
-      api.addEffectById('${effectID}', target);
-    });
-    \`\`\``;
+let targets = api.getSelectedOrDroppedToken();
+targets.forEach(target => {
+  api.addEffectById('${effectID}', target);
+});
+\`\`\``;
     });
 
     return effectButtons;

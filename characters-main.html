@@ -64,9 +64,6 @@
       const valuesToSet = {
         "data.careerName": careerName,
         "fields.careers.hidden": false,
-        "data.forceRating":
-          (careerObj?.data?.forceRating || 0) +
-          (record?.data?.forceRating || 0),
       };
 
       // Mark all career skills
@@ -127,17 +124,6 @@
     if (!deletedItem) return;
 
     onConditionChange(record, deletedItem);
-  }
-
-  function updateForceRating() {
-    const baseForceRating = parseInt(record?.data?.forceRating || "0", 10);
-    const committedForce = parseInt(record?.data?.committedForce || "0", 10);
-    const remainingForce = Math.max(0, baseForceRating - committedForce);
-
-    api.setValues({
-      "data.totalForceRating": baseForceRating,
-      "data.remainingForce": remainingForce,
-    });
   }
 
   function onLoadCharacter() {

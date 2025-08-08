@@ -13,22 +13,23 @@
     >
       <portrait width="125px" height="125px" field="portrait"></portrait>
     </div>
-    <stringfield
-      width="100%"
-      field="skills"
-      label="Skills"
-      placeholder="Enter Career Skills, separated by commas..."
-      multiline="true"
-    ></stringfield>
+    <div style="display: flex; flex-direction: column; gap: 4px; width: 100%">
+      <stringfield
+        width="100%"
+        field="skills"
+        label="Skills"
+        placeholder="Enter Career Skills, separated by commas..."
+        multiline="true"
+      ></stringfield>
+      <stringfield
+        width="100%"
+        field="specializations"
+        label="Specializations"
+        placeholder="Enter Specializations, if applicable to setting..."
+        multiline="true"
+      ></stringfield>
+    </div>
   </div>
-
-  <stringfield
-    width="100%"
-    field="specializations"
-    label="Specializations"
-    placeholder="Enter Specializations, separated by commas..."
-    multiline="true"
-  ></stringfield>
 
   <div style="margin-top: 8px; margin-bottom: 8px">
     <divider label="Description"></divider>

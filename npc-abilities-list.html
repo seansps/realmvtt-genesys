@@ -1,7 +1,8 @@
 <script>
   function onUseAbility() {
-    const talent = api.getValue(getNearestParentDataPath(dataPath));
-    useAbility(record, talent);
+    const abilityDataPath = getNearestParentDataPath(dataPath);
+    const ability = api.getValue(abilityDataPath);
+    useAbility(record, ability, abilityDataPath);
   }
 </script>
 
