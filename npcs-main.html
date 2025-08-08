@@ -1,0 +1,1234 @@
+<script>
+  function onDrop(type, recordLink) {
+    if (type === "conditions") {
+      onDropCondition(type, recordLink);
+    } else if (type === "items") {
+      onDropItem(recordLink);
+    } else if (type === "talents") {
+      onDropTalent(recordLink);
+    } else if (type === "force_powers") {
+      onDropForcePower(recordLink);
+    } else if (type === "npcs" && isVehicle(recordLink.value)) {
+      api.setValue("data.activeVehicle", [recordLink.value]);
+    }
+  }
+
+  function isVehicle(value) {
+    return value?.data?.type === "vehicle";
+  }
+
+  function onDropCondition(type, recordLink) {
+    // Requery the record to get the latest record
+    api.getRecord(record.recordType, record._id, (actualRecord) => {
+      addConditionToRecord(actualRecord, recordLink);
+    });
+  }
+
+  function onTypeChange() {
+    onLoadNPC();
+  }
+
+  function onChangeMinionWounds() {
+    // Set the wound threshold = to numberInGroup * woundsPerMinion
+    const woundsPerMinion =
+      record.data?.woundsPerMinion === undefined
+        ? 0
+        : record.data?.woundsPerMinion;
+    const woundThreshold =
+      woundsPerMinion *
+      (record.data?.numberInGroup === undefined
+        ? 1
+        : record.data?.numberInGroup);
+    api.setValues(
+      {
+        "data.woundThreshold": woundThreshold,
+        "data.woundsRemaining": Math.max(
+          0,
+          woundThreshold - (record.data?.wounds || 0)
+        ),
+      },
+      (updatedRecord) => {
+        // Recalculate skills
+        updateAttributes(updatedRecord);
+      }
+    );
+  }
+
+  function onChangeConditions() {
+    // Recalculate wounds and strain, and other attributes
+    const deletedItem = data.deletedItem;
+    if (!deletedItem) return;
+
+    onConditionChange(record, deletedItem);
+  }
+
+  function updateForceRating() {
+    const baseForceRating = parseInt(record?.data?.forceRating || "0", 10);
+    const committedForce = parseInt(record?.data?.committedForce || "0", 10);
+    const remainingForce = Math.max(0, baseForceRating - committedForce);
+
+    api.setValues({
+      "data.totalForceRating": baseForceRating,
+      "data.remainingForce": remainingForce,
+    });
+  }
+
+  function onLoadNPC() {
+    // Show/hide fields based on type
+    showHideFields(() => {
+      // Initialize skills if needed
+      if (record.data?.type !== "vehicle") {
+        initializeSkills(record);
+      } else {
+        // Remove all skills if needed
+        if (record.data?.skills) {
+          api.setValues({
+            "data.skills": [],
+          });
+        }
+      }
+    });
+  }
+
+  function showHideFields(callback) {
+    // Return immediately if this is a NPC (i.e. vehicle) linked to another record
+    if (
+      record.recordType !== "npcs" ||
+      dataPath.includes("data.activeVehicle")
+    ) {
+      return;
+    }
+
+    // Determine if we need to change any fields
+    const fieldsToSet = {};
+
+    if (record.data?.type !== "vehicle") {
+      // Show/hide creature properties
+      if (record.fields?.creatureProperties?.hidden !== false) {
+        fieldsToSet["fields.creatureProperties.hidden"] = false;
+      }
+      if (record.fields?.creatureAbilities?.hidden !== false) {
+        fieldsToSet["fields.creatureAbilities.hidden"] = false;
+      }
+      if (record.fields?.vehicleProperties?.hidden !== true) {
+        fieldsToSet["fields.vehicleProperties.hidden"] = true;
+      }
+      if (record.fields?.speciesName?.hidden !== false) {
+        fieldsToSet["fields.speciesName.hidden"] = false;
+      }
+
+      // Show/hide fields specific to creature types (minions, rivals, nemeses)
+      const showStrain = record.data?.type === "nemesis"; // Only nemeses have strain
+      if (record.fields?.strainThreshold?.hidden !== !showStrain) {
+        fieldsToSet["fields.strainThreshold.hidden"] = !showStrain;
+        fieldsToSet["fields.strain.hidden"] = !showStrain;
+      } else if (
+        record.data?.type === undefined ||
+        record.data?.type === "minion" ||
+        record.data?.type === "rival"
+      ) {
+        // Minions and rivals have no strain
+        if (record.data?.strainThreshold !== 0) {
+          fieldsToSet["data.strainThreshold"] = 0;
+          fieldsToSet["data.strain"] = 0;
+          fieldsToSet["data.strainRemaining"] = 0;
+        }
+      }
+      const showMinionFields = // Only minions have wounds per minion and numberInGroup
+        !record.data?.type || record.data?.type === "minion";
+      if (record.fields?.woundsPerMinion?.hidden !== !showMinionFields) {
+        fieldsToSet["fields.woundsPerMinion.hidden"] = !showMinionFields;
+        fieldsToSet["fields.numberInGroup.hidden"] = !showMinionFields;
+      }
+    } else {
+      // Show/hide vehicle properties
+      if (record.fields?.creatureProperties?.hidden !== true) {
+        fieldsToSet["fields.creatureProperties.hidden"] = true;
+      }
+      if (record.fields?.creatureAbilities?.hidden !== true) {
+        fieldsToSet["fields.creatureAbilities.hidden"] = true;
+      }
+      if (record.fields?.vehicleProperties?.hidden !== false) {
+        fieldsToSet["fields.vehicleProperties.hidden"] = false;
+      }
+      // Show/hide species name
+      if (record.fields?.speciesName?.hidden !== true) {
+        fieldsToSet["fields.speciesName.hidden"] = true;
+      }
+      if (record.fields?.strainThreshold?.hidden !== false) {
+        fieldsToSet["fields.strainThreshold.hidden"] = false;
+      }
+      if (record.fields?.strain?.hidden !== false) {
+        fieldsToSet["fields.strain.hidden"] = false;
+      }
+      if (
+        record.fields?.vehicleHardpoints?.hidden !== false &&
+        record.data?.hardpoints &&
+        record.data?.hardpoints > 0
+      ) {
+        fieldsToSet["fields.vehicleHardpoints.hidden"] = false;
+      } else if (
+        record.fields?.vehicleHardpoints?.hidden !== true &&
+        (!record.data?.hardpoints || record.data?.hardpoints === 0)
+      ) {
+        fieldsToSet["fields.vehicleHardpoints.hidden"] = true;
+      }
+    }
+
+    // Show/hide use button for talents
+    const talents = record?.data?.talents || [];
+    talents.forEach((talent, index) => {
+      if (
+        talent?.data?.activation &&
+        record.data?.talents?.[index]?.fields?.useButton?.hidden === undefined
+      ) {
+        fieldsToSet[`data.talents.${index}.fields.useButton.hidden`] = !(
+          talent?.data?.activation || ""
+        )
+          .toLowerCase()
+          .includes("active");
+      }
+    });
+
+    // Set values for force powers if needed
+    const forcePowers = record?.data?.features || [];
+    forcePowers.forEach((forcePower, index) => {
+      if (
+        forcePower?.recordType === "force_powers" &&
+        forcePower?.fields?.abilityPortrait?.hidden === undefined
+      ) {
+        fieldsToSet[
+          `data.features.${index}.fields.abilityPortrait.hidden`
+        ] = false;
+        fieldsToSet[
+          `data.features.${index}.fields.customAbility.hidden`
+        ] = true;
+        fieldsToSet[`data.features.${index}.data.isForcePower`] = true;
+      }
+    });
+
+    if (Object.keys(fieldsToSet).length > 0) {
+      api.setValues(fieldsToSet, () => {
+        if (callback) {
+          callback();
+        }
+      });
+    } else if (callback) {
+      callback();
+    }
+  }
+
+  function onRollCriticalInjury() {
+    const critType =
+      record.data?.type === "vehicle" || dataPath.includes("data.activeVehicle")
+        ? "hit"
+        : "injury";
+    const nearestParentDataPath = getNearestParentDataPath(dataPath);
+    const thisRecord = api.getValue(nearestParentDataPath) || record;
+    rollCriticalInjury(thisRecord, critType, []);
+  }
+
+  function rollInit() {
+    rollInitiative(record);
+  }
+
+  function onDropForcePower(recordLink) {
+    const forcePower = recordLink?.value;
+    api.addValue(`data.features`, {
+      ...forcePower,
+      data: {
+        ...forcePower?.data,
+        isForcePower: true,
+      },
+      fields: {
+        ...forcePower?.fields,
+        // Show the portrait for force powers
+        abilityPortrait: {
+          hidden: false,
+        },
+        // Hide the icon button for force powers
+        customAbility: {
+          hidden: true,
+        },
+      },
+    });
+  }
+
+  function onDropItem(recordLink) {
+    const item = recordLink?.value;
+
+    const isConsumable = item?.data?.consumable || false;
+    const hasUseBtn = item?.data?.hasUseBtn || false;
+
+    const recordDataPath = getNearestParentDataPath(dataPath);
+    const thisRecord = api.getValue(recordDataPath) || record;
+
+    let unitCount = 1;
+    // Add the item and set the attunement hidden field to visible if requires attunement
+    const itemToAdd = {
+      ...item,
+      icon: "IconBox",
+      data: {
+        ...item?.data,
+        // Track old ID for count tracking
+        fromId: item._id,
+        // Default count to 1
+        count: unitCount,
+      },
+      fields: {
+        ...item?.fields,
+        useBtn: {
+          hidden: !isConsumable && !hasUseBtn,
+        },
+      },
+    };
+
+    // Determine if we are adding the item or adding count to an existing item
+    const items = thisRecord?.data?.inventory || [];
+    const index = items.findIndex((i) => i.data?.fromId === item._id);
+
+    // If the item is an item pack, we're adding a list of items
+    if (item.data?.type === "pack") {
+      // Get the total weight of all items in the pack
+      const itemsInPack = item.data?.items || [];
+      const valuesToSet = {};
+      // Add any currency in pack to character
+      valuesToSet[`${recordDataPath}.data.cash`] =
+        (thisRecord?.data?.cash || 0) + (item.data?.cash || 0);
+      const itemsToAdd = itemsInPack
+        .map((item) => {
+          // If this is existing item, get the current count
+          let thisIndex = items.findIndex((i) => i.data?.fromId === item._id);
+          let existingItem = thisIndex !== -1 ? items[thisIndex] : undefined;
+          let itemCount = parseFloat(item?.data?.count || "0");
+          const isConsumable = item.data?.consumable || false;
+          let curCount = parseFloat(existingItem?.data?.count || "0");
+          if (!existingItem) {
+            return {
+              ...item,
+              icon: "IconBox",
+              data: {
+                ...item.data,
+                fromId: item._id,
+                count: itemCount,
+              },
+              fields: {
+                ...item?.fields,
+                useBtn: {
+                  hidden: !isConsumable && !hasUseBtn,
+                },
+              },
+            };
+          } else {
+            valuesToSet[
+              `${
+                recordDataPath ? `${recordDataPath}.` : ""
+              }data.inventory.${thisIndex}.data.count`
+            ] = curCount + itemCount;
+          }
+        })
+        .filter((i) => i);
+      api.addValues(
+        `${recordDataPath ? `${recordDataPath}.` : ""}data.inventory`,
+        itemsToAdd,
+        (updatedRecord) => {
+          if (Object.keys(valuesToSet).length > 0) {
+            api.setValues(valuesToSet, () => {
+              // Requery the record to get the latest data
+              api.getRecord(thisRecord.recordType, record._id);
+            });
+          } else {
+            api.getRecord(thisRecord.recordType, record._id);
+          }
+        }
+      );
+    } else {
+      let existingItem = index !== -1 ? items[index] : undefined;
+      if (existingItem) {
+        // Add count to existing item
+        const count = parseFloat(existingItem.data?.count || "0");
+        let unitCount = 1;
+        // Update the value
+        api.setValue(
+          `${
+            recordDataPath ? `${recordDataPath}.` : ""
+          }data.inventory.${index}.data.count`,
+          count + unitCount
+        );
+      } else {
+        // Add the item to the list
+        api.addValue(
+          `${recordDataPath ? `${recordDataPath}.` : ""}data.inventory`,
+          itemToAdd
+        );
+      }
+    }
+  }
+
+  function onItemDeleted() {
+    // Update attributes as per modifiers
+    const valuesToSet = {};
+
+    const recordDataPath = getNearestParentDataPath(dataPath);
+    const thisRecord = api.getValue(recordDataPath) || record;
+
+    setTotalEncumbrance(thisRecord, valuesToSet);
+    updateAttributes(thisRecord, valuesToSet);
+    if (Object.keys(valuesToSet).length > 0) {
+      api.setValues(valuesToSet);
+    }
+  }
+
+  function onDropTalent(recordLink) {
+    const talent = recordLink?.value;
+    if (!talent) return;
+    let nearestParentDataPath = getNearestParentDataPath(dataPath);
+    let thisRecord = api.getValue(nearestParentDataPath) || record;
+
+    // Add the talent to the list
+    // If the talent is ranked, find the existing talent with the same name and add the rank
+    // If the talent is not ranked, add it to the list
+    const rankedTalent = talent?.data?.ranked === "yes" ? true : false;
+
+    // If it is ranked, check if it already exists in the talents list
+    const talentId = rankedTalent ? talent._id : generateUuid();
+    const existingTalent = thisRecord?.data?.talents?.find(
+      (t) => t._id === talentId
+    );
+    const existingTalentIndex = thisRecord?.data?.talents?.findIndex(
+      (t) => t._id === talentId
+    );
+
+    if (
+      rankedTalent &&
+      existingTalentIndex !== undefined &&
+      existingTalentIndex >= 0
+    ) {
+      // Update the rank
+      api.setValues({
+        [`data.talents.${existingTalentIndex}.data.rank`]:
+          (existingTalent?.data?.rank || 1) + 1,
+      });
+    } else {
+      // Add the talent to the list
+      const talents = [...(thisRecord?.data?.talents || [])];
+      talents.push({
+        ...talent,
+        _id: talentId,
+        data: {
+          ...talent?.data,
+          rank: 1,
+        },
+        fields: {
+          ...talent?.fields,
+          useButton: {
+            // Unhide the use button if not passive
+            hidden: !(talent?.data?.activation || "")
+              .toLowerCase()
+              .includes("active"),
+          },
+        },
+      });
+      api.setValues({
+        [`data.talents`]: talents,
+      });
+    }
+  }
+</script>
+
+<div style="display: flex; margin-top: 4px; flex-direction: column; gap: 8px">
+  <!-- First Flex Row: Portrait | (Species | Career) -->
+  <div
+    style="
+      display: flex;
+      flex-direction: row;
+      gap: 8px;
+      align-items: flex-start;
+    "
+  >
+    <div style="display: flex; flex-direction: column">
+      <div
+        style="
+          width: 125px;
+          min-width: 125px;
+          max-width: 125px;
+          min-height: 125px;
+          max-height: 125px;
+        "
+      >
+        <portrait width="125px" height="125px"></portrait>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 4px; width: 100%">
+      <div
+        style="
+          display: flex;
+          flex-direction: row;
+          gap: 4px;
+          align-items: flex-end;
+        "
+      >
+        <dropdown
+          width="100%"
+          size="sm"
+          field="type"
+          label="Type"
+          placeholder="Select Type..."
+          defaultvalue="minion"
+          onchange="onTypeChange();"
+          options='[{"value": "minion", "label": "Minion"}, {"value": "rival", "label": "Rival"},
+          {"value": "nemesis", "label": "Nemesis"}, {"value": "vehicle", "label": "Vehicle"}]'
+        ></dropdown>
+
+        <stringfield
+          width="100%"
+          size="sm"
+          field="subtype"
+          label="Subtype"
+          placeholder="Enter Subtype..."
+        ></stringfield>
+      </div>
+
+      <div
+        style="
+          display: flex;
+          flex-direction: row;
+          gap: 4px;
+          align-items: flex-end;
+        "
+      >
+        <stringfield
+          width="100%"
+          size="sm"
+          field="speciesName"
+          placeholder="Enter species..."
+          label="Species"
+        ></stringfield>
+
+        <dropdown
+          width="100%"
+          field="size"
+          label="Silhouette"
+          placeholder="Silhouette 1"
+          defaultvalue="Silhouette 1"
+          options='[{"value": "Silhouette 0", "label": "Silhouette 0"},
+  {"value": "Silhouette 1", "label": "Silhouette 1"}, 
+  {"value": "Silhouette 2", "label": "Silhouette 2"}, 
+  {"value": "Silhouette 3", "label": "Silhouette 3"}, 
+  {"value": "Silhouette 4", "label": "Silhouette 4"}, 
+  {"value": "Silhouette 5", "label": "Silhouette 5"}, 
+  {"value": "Silhouette 6", "label": "Silhouette 6"}, 
+  {"value": "Silhouette 7", "label": "Silhouette 7"}, 
+  {"value": "Silhouette 8", "label": "Silhouette 8"}, 
+  {"value": "Silhouette 9", "label": "Silhouette 9"}, 
+  {"value": "Silhouette 10", "label": "Silhouette 10"}]'
+        ></dropdown>
+      </div>
+    </div>
+  </div>
+
+  <!-- Second Flex Row: Stats (Brawn, Agility, Intellect, Cunning, Willpower, Presence) -->
+  <!-- Only for minions/rivals/nemeses -->
+  <box field="creatureProperties">
+    <div
+      style="
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+      "
+    >
+      <div
+        style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 2px;
+        "
+      >
+        <numberfield
+          placeholder="0"
+          size="xs"
+          width="60px"
+          textalign="center"
+          field="brawn"
+          label="Brawn"
+          onchange="updateAttribute({ record, attribute: 'brawn', value })"
+          onclick="rollCheck('brawn');"
+          onload="onLoadNPC();"
+        ></numberfield>
+        <button
+          field="Brawn Check"
+          size="xs"
+          width="60px"
+          variant="outline"
+          label="Roll"
+          onclick="rollCheck('brawn');"
+        ></button>
+      </div>
+
+      <div
+        style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 2px;
+        "
+      >
+        <numberfield
+          placeholder="0"
+          size="xs"
+          width="60px"
+          field="agility"
+          label="Agility"
+          textalign="center"
+          onchange="updateAttribute({ record, attribute: 'agility', value })"
+          onclick="rollCheck('agility');"
+        ></numberfield>
+        <button
+          field="Agility Check"
+          size="xs"
+          width="60px"
+          variant="outline"
+          label="Roll"
+          onclick="rollCheck('agility');"
+        ></button>
+      </div>
+
+      <div
+        style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 2px;
+        "
+      >
+        <numberfield
+          placeholder="0"
+          size="xs"
+          width="60px"
+          field="intellect"
+          textalign="center"
+          label="Intellect"
+          onchange="updateAttribute({ record, attribute: 'intellect', value })"
+          onclick="rollCheck('intellect');"
+        ></numberfield>
+        <button
+          field="Intellect Check"
+          size="xs"
+          width="60px"
+          variant="outline"
+          label="Roll"
+          onclick="rollCheck('intellect');"
+        ></button>
+      </div>
+
+      <div
+        style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 2px;
+        "
+      >
+        <numberfield
+          placeholder="0"
+          size="xs"
+          width="60px"
+          textalign="center"
+          field="cunning"
+          label="Cunning"
+          onchange="updateAttribute({ record, attribute: 'cunning', value })"
+          onclick="rollCheck('cunning');"
+        ></numberfield>
+        <button
+          field="Cunning Check"
+          size="xs"
+          width="60px"
+          variant="outline"
+          label="Roll"
+          onclick="rollCheck('cunning');"
+        ></button>
+      </div>
+
+      <div
+        style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 2px;
+        "
+      >
+        <numberfield
+          placeholder="0"
+          size="xs"
+          width="60px"
+          textalign="center"
+          field="willpower"
+          label="Willpower"
+          onchange="updateAttribute({ record, attribute: 'willpower', value })"
+          onclick="rollCheck('willpower');"
+        ></numberfield>
+        <button
+          field="Willpower Check"
+          size="xs"
+          width="60px"
+          variant="outline"
+          label="Roll"
+          onclick="rollCheck('willpower');"
+        ></button>
+      </div>
+
+      <div
+        style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 2px;
+        "
+      >
+        <numberfield
+          placeholder="0"
+          size="xs"
+          width="60px"
+          textalign="center"
+          field="presence"
+          label="Presence"
+          onchange="updateAttribute({ record, attribute: 'presence', value })"
+          onclick="rollCheck('presence');"
+        ></numberfield>
+        <button
+          field="Presence Check"
+          size="xs"
+          width="60px"
+          variant="outline"
+          label="Roll"
+          onclick="rollCheck('presence');"
+        ></button>
+      </div>
+    </div>
+
+    <!-- Third Flex Row: Health Stats -->
+    <div
+      style="
+        display: flex;
+        flex-direction: row;
+        gap: 6px;
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+      "
+    >
+      <numberfield
+        placeholder="0"
+        size="xs"
+        width="50px"
+        field="soakValue"
+        label="Soak"
+      ></numberfield>
+
+      <numberfield
+        placeholder="0"
+        size="xs"
+        width="80px"
+        icon="IconHeartFilled"
+        field="woundThreshold"
+        label="W. Threshold"
+        color="pink"
+        onchange="updateAttribute({ record, attribute: 'woundThreshold', value })"
+      ></numberfield>
+
+      <numberfield
+        placeholder="0"
+        size="xs"
+        width="100px"
+        field="woundsPerMinion"
+        label="W.T. Per Minion"
+        onchange="onChangeMinionWounds();"
+        icon="IconHeart"
+        color="pink"
+      ></numberfield>
+
+      <numberfield
+        placeholder="0"
+        size="xs"
+        width="80px"
+        icon="IconBandageFilled"
+        field="wounds"
+        label="Wounds"
+        color="red"
+        minvalue="0"
+        onchange="updateAttribute({ record, attribute: 'wounds', value })"
+      ></numberfield>
+
+      <numberfield
+        placeholder="0"
+        size="xs"
+        width="80px"
+        hidden="true"
+        icon="IconHeartbeat"
+        field="strainThreshold"
+        label="S. Threshold"
+        color="blue"
+        onchange="updateAttribute({ record, attribute: 'strainThreshold', value })"
+      ></numberfield>
+
+      <numberfield
+        placeholder="0"
+        size="xs"
+        width="80px"
+        hidden="true"
+        icon="IconActivity"
+        field="strain"
+        label="Strain"
+        color="cyan"
+        minvalue="0"
+        onchange="updateAttribute({ record, attribute: 'strain', value })"
+      ></numberfield>
+    </div>
+
+    <div
+      style="
+        display: flex;
+        flex-direction: row;
+        gap: 6px;
+        width: 100%;
+        justify-content: center;
+        align-items: flex-end;
+      "
+    >
+      <numberfield
+        size="xs"
+        width="120px"
+        field="numberInGroup"
+        icon="IconUsers"
+        placeholder="1"
+        defaultvalue="1"
+        label="# Minions in Group"
+        color="cyan"
+        onchange="onChangeMinionWounds();"
+      ></numberfield>
+      <numberfield
+        placeholder="0"
+        size="xs"
+        width="120px"
+        field="defenseMelee"
+        icon="IconShield"
+        label="Defense (Melee)"
+        color="violet"
+      ></numberfield>
+
+      <numberfield
+        placeholder="0"
+        size="xs"
+        width="120px"
+        field="defenseRanged"
+        icon="IconShield"
+        label="Defense (Ranged)"
+        color="violet"
+      ></numberfield>
+    </div>
+
+    <!-- Attacks for minions/rivals/nemeses -->
+    <divider label="Attacks"></divider>
+
+    <div style="width: 100%; display: flex; gap: 4px; align-items: flex-end">
+      <dropdown
+        field="rangeBand"
+        placeholder="Select Range Band..."
+        disablediflocked="false"
+        size="xs"
+        label="Range to Target"
+        width="fit-content"
+        options='[{"label": "Engaged / Close", "value": "Engaged"}, {"label": "Short", "value": "Short"},
+          {"label": "Medium", "value": "Medium"}, {"label": "Long", "value": "Long"},
+          {"label": "Extreme", "value": "Extreme"}]'
+      ></dropdown>
+      <div
+        style="
+          margin-left: auto;
+          display: flex;
+          flex-direction: row;
+          gap: 4px;
+          align-items: flex-end;
+        "
+      >
+        <dropdown
+          label="Initiative Skill"
+          field="initiativeSkill"
+          placeholder="Select Initiative Skill..."
+          disablediflocked="false"
+          size="xs"
+          defaultvalue="Vigilance"
+          options='[{"label": "Vigilance", "value": "Vigilance"}, {"label": "Cool", "value": "Cool"}]'
+        ></dropdown>
+
+        <div style="min-width: 120px">
+          <button
+            field="rollInitBtn"
+            size="xs"
+            label="Roll Initiative"
+            variant="outline"
+            onclick="rollInit();"
+          ></button>
+        </div>
+      </div>
+    </div>
+    <div
+      style="
+        display: flex;
+        flex-direction: column;
+        margin-top: 8px;
+        flex-grow: 1;
+      "
+    >
+      <list
+        listtype="attack_list"
+        emptylisttext="None"
+        variant="striped"
+        field="inventory"
+      >
+      </list>
+    </div>
+  </box>
+
+  <box field="vehicleProperties" hidden="true">
+    <!-- Armor & Hull (Vehicle health)-->
+    <div
+      style="
+        display: flex;
+        flex-direction: row;
+        gap: 4px;
+        margin-bottom: 8px;
+        justify-content: center;
+        flex-wrap: wrap;
+      "
+    >
+      <numberfield
+        width="60px"
+        size="xs"
+        field="soakValue"
+        label="Armor"
+        placeholder="0"
+      ></numberfield>
+      <numberfield
+        width="80px"
+        size="xs"
+        color="pink"
+        icon="IconHeartFilled"
+        field="woundThreshold"
+        label="HT Threshold"
+        placeholder="0"
+        onchange="updateAttribute({ record, attribute: 'woundThreshold', value })"
+      ></numberfield>
+      <numberfield
+        width="80px"
+        size="xs"
+        color="red"
+        icon="IconHeart"
+        field="wounds"
+        label="Hull Trauma"
+        placeholder="0"
+        onchange="updateAttribute({ record, attribute: 'wounds', value })"
+      ></numberfield>
+      <numberfield
+        width="80px"
+        size="xs"
+        color="blue"
+        icon="IconActivity"
+        field="strainThreshold"
+        label="SS Threshold"
+        placeholder="0"
+        onchange="updateAttribute({ record, attribute: 'strainThreshold', value })"
+      ></numberfield>
+      <numberfield
+        width="80px"
+        size="xs"
+        color="cyan"
+        icon="IconHeartbeat"
+        field="strain"
+        label="S. Strain"
+        placeholder="0"
+        onchange="updateAttribute({ record, attribute: 'strain', value })"
+      ></numberfield>
+    </div>
+
+    <!-- Additional Vehicle Characteristics -->
+    <div
+      style="
+        display: flex;
+        flex-direction: row;
+        gap: 4px;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+      "
+    >
+      <numberfield
+        width="80px"
+        size="xs"
+        field="speed"
+        label="Speed"
+        placeholder="0"
+      ></numberfield>
+      <numberfield
+        width="80px"
+        size="xs"
+        field="handling"
+        label="Handling"
+        placeholder="0"
+      ></numberfield>
+    </div>
+
+    <!-- Defense Ratings -->
+    <div style="margin-bottom: 8px">
+      <label
+        variant="bold"
+        size="sm"
+        textalign="center"
+        label="Defense and Current Speed"
+      ></label>
+      <div
+        style="
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          grid-template-rows: auto auto auto;
+          gap: 4px;
+          max-width: 300px;
+          margin: 0 auto;
+          position: relative;
+          padding: 0px 8px 8px 8px;
+          background: linear-gradient(
+            45deg,
+            rgba(147, 51, 234, 0.1),
+            rgba(79, 70, 229, 0.1)
+          );
+          border-radius: 8px;
+          border: 1px solid rgba(147, 51, 234, 0.2);
+          margin-top: 4px;
+        "
+      >
+        <!-- Top row - Fore -->
+        <div
+          style="
+            grid-column: 2;
+            grid-row: 1;
+            display: flex;
+            justify-content: center;
+          "
+        >
+          <numberfield
+            width="80px"
+            size="xs"
+            field="defFore"
+            textalign="center"
+            label="Fore"
+            placeholder="--"
+            color="violet"
+          ></numberfield>
+        </div>
+        <!-- Middle row - Port and Starboard -->
+        <div
+          style="
+            grid-column: 1;
+            grid-row: 2;
+            display: flex;
+            justify-content: center;
+          "
+        >
+          <numberfield
+            width="80px"
+            size="xs"
+            field="defPort"
+            color="violet"
+            textalign="center"
+            label="Port"
+            placeholder="--"
+          ></numberfield>
+        </div>
+
+        <div
+          style="
+            grid-column: 3;
+            grid-row: 2;
+            display: flex;
+            justify-content: center;
+          "
+        >
+          <numberfield
+            width="80px"
+            size="xs"
+            field="defStarboard"
+            color="violet"
+            textalign="center"
+            label="Starboard"
+            placeholder="--"
+          ></numberfield>
+        </div>
+        <!-- Bottom row - Aft -->
+        <div
+          style="
+            grid-column: 2;
+            grid-row: 3;
+            display: flex;
+            justify-content: center;
+          "
+        >
+          <numberfield
+            width="80px"
+            size="xs"
+            field="defAft"
+            color="violet"
+            textalign="center"
+            label="Aft"
+            placeholder="--"
+          ></numberfield>
+        </div>
+      </div>
+    </div>
+  </box>
+
+  <!-- Equipment -->
+  <divider label="Equipment"></divider>
+  <box field="vehicleHardpoints" hidden="true">
+    <div
+      style="
+        display: flex;
+        flex-direction: row;
+        gap: 4px;
+        margin-bottom: 8px;
+        justify-content: center;
+        align-items: center;
+      "
+    >
+      <label
+        variant="bold"
+        size="sm"
+        textalign="center"
+        label="Hardpoints Used"
+      ></label>
+      <counter
+        field="hardpointsUsed"
+        minvalue="0"
+        maxvaluefield="hardpoints"
+      ></counter>
+    </div>
+  </box>
+
+  <list
+    listtype="npc_inventory_list"
+    field="inventory"
+    variant="striped"
+    ondelete="onItemDeleted();"
+  ></list>
+
+  <box field="creatureProperties">
+    <!-- Talents -->
+    <divider label="Talents"></divider>
+    <list listtype="npc_talents_list" field="talents" variant="striped"></list>
+
+    <divider label="Abilities"></divider>
+    <list
+      listtype="npc_abilities_list"
+      field="features"
+      variant="striped"
+    ></list>
+
+    <divider label="Active Vehicle"></divider>
+    <list
+      emptylisttext="Drag a Vehicle on the Main Tab"
+      listtype="active_vehicle_list"
+      field="activeVehicle"
+    >
+    </list>
+
+    <divider label="Critical Injuries"></divider>
+  </box>
+
+  <box field="vehicleProperties" hidden="true">
+    <divider label="Actions"></divider>
+    <list
+      listtype="npc_vehicle_actions_list"
+      field="features"
+      variant="striped"
+    ></list>
+    <divider label="Critical Hits"></divider>
+  </box>
+
+  <!-- Critical Injuries List -->
+  <div
+    style="
+      display: flex;
+      flex-direction: row;
+      gap: 8px;
+      width: 100%;
+      align-items: flex-end;
+      justify-content: right;
+    "
+  >
+    <button
+      field="rollCriticalInjuryBtn"
+      size="xs"
+      variant="outline"
+      color="primary"
+      label="Roll for Critical Injury / Hit"
+      onclick="onRollCriticalInjury();"
+    ></button>
+  </div>
+  <div style="min-height: 75px; max-height: 200px; overflow-y: auto">
+    <list
+      listtype="conditions_list"
+      field="criticalInjuries"
+      height="100%"
+      variant="striped"
+      onchange="onChangeConditions();"
+    ></list>
+  </div>
+
+  <!-- Force Rating -->
+  <box field="creatureAbilities">
+    <divider label="Force Rating"></divider>
+    <div
+      style="
+        display: flex;
+        flex-direction: row;
+        gap: 6px;
+        width: 100%;
+        justify-content: center;
+      "
+    >
+      <numberfield
+        placeholder="0"
+        size="xs"
+        width="120px"
+        field="forceRating"
+        label="Total Force Rating"
+        onchange="updateForceRating()"
+      ></numberfield>
+
+      <numberfield
+        placeholder="0"
+        size="xs"
+        width="100px"
+        field="committedForce"
+        label="Committed"
+        onchange="updateForceRating()"
+        minvalue="0"
+      ></numberfield>
+
+      <numberfield
+        placeholder="0"
+        size="xs"
+        width="100px"
+        field="remainingForce"
+        hidecontrols="true"
+        label="Remaining"
+        editable="false"
+      ></numberfield>
+    </div>
+  </box>
+</div>
