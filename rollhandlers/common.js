@@ -1024,42 +1024,69 @@ function getTagsForQualities(weapon) {
   return tags;
 }
 
-function getAllStarWarsSkills() {
+function getGenesysSkillGroups() {
+  const skills = record?.data?.skills || [];
+  const groups = skills.map((skill) => skill.data?.group || "");
+  const uniqueGroups = [...new Set(groups)].filter((group) => group !== "");
+
+  // Always include the "All" option at the beginning
+  return [
+    { value: "", label: "All" },
+    ...uniqueGroups.map((group) => ({
+      value: group,
+      label: group,
+    })),
+  ];
+}
+
+function getAllGenesysSkills() {
   const skills = [
-    { name: "Astrogation", stat: "intellect", group: "General" },
+    // Social Skills
+    { name: "Charm", stat: "presence", group: "Social" },
+    { name: "Coercion", stat: "willpower", group: "Social" },
+    { name: "Deception", stat: "cunning", group: "Social" },
+    { name: "Leadership", stat: "presence", group: "Social" },
+    { name: "Negotiation", stat: "presence", group: "Social" },
+
+    // General Skills
+    { name: "Alchemy", stat: "intellect", group: "General" },
+    { name: "Astrocartography", stat: "intellect", group: "General" },
     { name: "Athletics", stat: "brawn", group: "General" },
-    { name: "Brawl", stat: "brawn", group: "Combat" },
-    { name: "Charm", stat: "presence", group: "General" },
-    { name: "Coercion", stat: "willpower", group: "General" },
     { name: "Computers", stat: "intellect", group: "General" },
     { name: "Cool", stat: "presence", group: "General" },
     { name: "Coordination", stat: "agility", group: "General" },
-    { name: "Core Worlds", stat: "intellect", group: "Knowledge" },
-    { name: "Deception", stat: "cunning", group: "General" },
     { name: "Discipline", stat: "willpower", group: "General" },
-    { name: "Education", stat: "intellect", group: "Knowledge" },
-    { name: "Gunnery", stat: "agility", group: "Combat" },
-    { name: "Leadership", stat: "presence", group: "General" },
-    { name: "Lightsaber", stat: "brawn", group: "Combat" },
-    { name: "Lore", stat: "intellect", group: "Knowledge" },
+    { name: "Driving", stat: "agility", group: "General" },
     { name: "Mechanics", stat: "intellect", group: "General" },
     { name: "Medicine", stat: "intellect", group: "General" },
-    { name: "Melee", stat: "brawn", group: "Combat" },
-    { name: "Negotiation", stat: "presence", group: "General" },
-    { name: "Outer Rim", stat: "intellect", group: "Knowledge" },
+    { name: "Operating", stat: "intellect", group: "General" },
     { name: "Perception", stat: "cunning", group: "General" },
-    { name: "Piloting (Planetary)", stat: "agility", group: "General" },
-    { name: "Piloting (Space)", stat: "agility", group: "General" },
-    { name: "Ranged (Heavy)", stat: "agility", group: "Combat" },
-    { name: "Ranged (Light)", stat: "agility", group: "Combat" },
+    { name: "Piloting", stat: "agility", group: "General" },
     { name: "Resilience", stat: "brawn", group: "General" },
+    { name: "Riding", stat: "agility", group: "General" },
     { name: "Skulduggery", stat: "cunning", group: "General" },
     { name: "Stealth", stat: "agility", group: "General" },
     { name: "Streetwise", stat: "cunning", group: "General" },
     { name: "Survival", stat: "cunning", group: "General" },
-    { name: "Underworld", stat: "intellect", group: "Knowledge" },
     { name: "Vigilance", stat: "willpower", group: "General" },
-    { name: "Xenology", stat: "intellect", group: "Knowledge" },
+
+    // Knowledge Skills
+    { name: "Knowledge", stat: "intellect", group: "Knowledge" },
+
+    // Combat Skills
+    { name: "Brawl", stat: "brawn", group: "Combat" },
+    { name: "Melee", stat: "brawn", group: "Combat" },
+    { name: "Melee (Light)", stat: "brawn", group: "Combat" },
+    { name: "Melee (Heavy)", stat: "brawn", group: "Combat" },
+    { name: "Ranged", stat: "agility", group: "Combat" },
+    { name: "Ranged (Light)", stat: "agility", group: "Combat" },
+    { name: "Ranged (Heavy)", stat: "agility", group: "Combat" },
+    { name: "Gunnery", stat: "agility", group: "Combat" },
+
+    // Magic Skills
+    { name: "Arcana", stat: "intellect", group: "Magic" },
+    { name: "Divine", stat: "willpower", group: "Magic" },
+    { name: "Primal", stat: "cunning", group: "Magic" },
   ];
 
   return skills;
@@ -1094,8 +1121,7 @@ function initializeSkills(record) {
           skill: "Brawl",
           weaponSkill: "Brawl",
           range: "Engaged",
-          special: ["unarmed", "disorient", "knockdown"],
-          disorient: 1,
+          special: ["unarmed", "knockdown"],
           description:
             "Unarmed attacks use the Brawl skill and Brawn for base damage. Damage can be done to strain instead of wounds.",
         },
@@ -1106,7 +1132,9 @@ function initializeSkills(record) {
 
   // Only initialize if no skills exist
   if (existingSkills.length === 0) {
-    const allSkills = getAllStarWarsSkills();
+    // TODO after adding Settings, get from active setting,
+    // Else get generic Genesys skills
+    const allSkills = getAllGenesysSkills();
 
     // Create array of all skill objects
     const skillObjects = allSkills.map((skill) => ({

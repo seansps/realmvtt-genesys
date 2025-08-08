@@ -1,0 +1,387 @@
+<script>
+  function onDamageChange(value) {
+    const damage = value;
+    api.setHidden("abilityProperties", damage === 0);
+  }
+
+  function onAbilityPropertiesChange() {
+    const nearestParentDataPath = getNearestParentDataPath(dataPath);
+    const ability = api.getValue(nearestParentDataPath) || record;
+    const properties = ability?.data?.special || [];
+
+    // If this is an nested item, just return. (Like a weapon attachment)
+    let pathToFields = "fields";
+    if (nearestParentDataPath !== "") {
+      pathToFields = `${nearestParentDataPath}.fields`;
+    }
+
+    const valuesToSet = {};
+
+    // Handle number field visibility for props
+    const qualityFields = [
+      "accurate",
+      "breach",
+      "burn",
+      "blast",
+      "concussive",
+      "cumbersome",
+      "defensive",
+      "deflection",
+      "disorient",
+      "ensnare",
+      "guided",
+      "inaccurate",
+      "limitedAmmo",
+      "linked",
+      "pierce",
+      "prepare",
+      "slowFiring",
+      "stun",
+      "tractor",
+      "vicious",
+    ];
+
+    qualityFields.forEach((field) => {
+      const qualityValue =
+        field === "limitedAmmo"
+          ? "limited-ammo"
+          : field === "slowFiring"
+          ? "slow-firing"
+          : field === "stun-damage"
+          ? "stun-damage"
+          : field;
+
+      if (
+        properties.includes(qualityValue) &&
+        ability?.fields?.[field]?.hidden !== false
+      ) {
+        valuesToSet[`${pathToFields}.${field}.hidden`] = false;
+      } else if (
+        !properties.includes(qualityValue) &&
+        ability?.fields?.[field]?.hidden !== true
+      ) {
+        valuesToSet[`${pathToFields}.${field}.hidden`] = true;
+      }
+    });
+
+    if (Object.keys(valuesToSet).length > 0) {
+      api.setValues(valuesToSet);
+    }
+  }
+</script>
+
+<div
+  style="display: flex; flex-direction: column; width: 100%; margin-bottom: 4px"
+>
+  <div style="display: flex; gap: 4px">
+    <div
+      style="width: 125px; height: 125px; min-height: 125px; min-width: 125px"
+    >
+      <portrait width="125px" height="125px" field="portrait"></portrait>
+    </div>
+    <div
+      style="
+        display: flex;
+        gap: 4px;
+        flex-direction: column;
+        width: 100%;
+        margin-bottom: 4px;
+      "
+    >
+      <stringfield
+        width="100%"
+        size="sm"
+        field="skillCheck"
+        label="Skill"
+        placeholder="Enter Skill to Roll if Applicable..."
+      ></stringfield>
+      <div style="display: flex; flex-direction: row; width: 100%; gap: 8px">
+        <numberfield
+          field="damage"
+          size="sm"
+          width="100%"
+          label="Damage (if Attack)"
+          placeholder="0"
+          minvalue="0"
+          onchange="onDamageChange(value);"
+          hidewhenidentified="false"
+        ></numberfield>
+      </div>
+    </div>
+  </div>
+
+  <box field="effectProperties" hidewhenidentified="false">
+    <dropdown
+      width="100%"
+      field="effects"
+      label="Effects"
+      description="Effects that can be applied when used"
+      placeholder="Select Effects if Applicable..."
+      multiselect="10"
+      optionsquery='{"type": "effects", "query": {}}'
+    >
+    </dropdown>
+  </box>
+
+  <box field="abilityProperties" hidden="true" hidewhenidentified="false">
+    <div style="display: flex; flex-direction: row; width: 100%; gap: 8px">
+      <dropdown
+        width="100%"
+        field="special"
+        label="Special"
+        size="sm"
+        placeholder="Select Ability Properties..."
+        multiselect="28"
+        searchable="true"
+        onchange="onAbilityPropertiesChange();"
+        options='[{"label": "Accurate (Passive)", "value": "accurate"}, 
+        {"label": "Auto-Fire (Active)", "value": "auto-fire"}, 
+        {"label": "Breach (Passive)", "value": "breach"}, 
+        {"label": "Burn (Active)", "value": "burn"}, 
+        {"label": "Blast (Active)", "value": "blast"}, 
+        {"label": "Concussive (Active)", "value": "concussive"}, 
+        {"label": "Cortosis (Passive)", "value": "cortosis"}, 
+        {"label": "Cumbersome (Passive)", "value": "cumbersome"}, 
+        {"label": "Defensive (Passive)", "value": "defensive"}, 
+        {"label": "Deflection (Passive)", "value": "deflection"}, 
+        {"label": "Disorient (Active)", "value": "disorient"}, 
+        {"label": "Ensnare (Active)", "value": "ensnare"}, 
+        {"label": "Guided (Active)", "value": "guided"}, 
+        {"label": "Knockdown (Active)", "value": "knockdown"}, 
+        {"label": "Inaccurate (Passive)", "value": "inaccurate"}, 
+        {"label": "Inferior (Passive)", "value": "inferior"}, 
+        {"label": "Ion (Passive)", "value": "ion"}, 
+        {"label": "Limited Ammo (Passive)", "value": "limited-ammo"}, 
+        {"label": "Linked (Active)", "value": "linked"}, 
+        {"label": "Pierce (Passive)", "value": "pierce"}, 
+        {"label": "Prepare (Passive)", "value": "prepare"},
+        {"label": "Slow-Firing (Passive)", "value": "slow-firing"}, 
+        {"label": "Stun (Active)", "value": "stun"}, 
+        {"label": "Stun Damage (Passive)", "value": "stun-damage"},
+        {"label": "Stun Damage (Passive, Droid only)", "value": "stun-damage-droid"},
+        {"label": "Stun Setting", "value": "stun-setting"},
+        {"label": "Sunder (Active)", "value": "sunder"}, 
+        {"label": "Superior (Passive)", "value": "superior"}, 
+        {"label": "Tractor (Passive)", "value": "tractor"}, 
+        {"label": "Vicious (Passive)", "value": "vicious"}, 
+        {"label": "Unarmed", "value": "unarmed"}]'
+      ></dropdown>
+    </div>
+    <!-- Some special properties have values that need to be set -->
+    <div
+      style="
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        gap: 8px;
+        flex-wrap: wrap;
+      "
+    >
+      <numberfield
+        width="100px"
+        field="accurate"
+        label="Accurate"
+        placeholder="0"
+        minvalue="0"
+        size="sm"
+        hidden="true"
+      ></numberfield>
+      <numberfield
+        width="100px"
+        field="breach"
+        label="Breach"
+        placeholder="0"
+        minvalue="0"
+        size="sm"
+        hidden="true"
+      ></numberfield>
+      <numberfield
+        width="100px"
+        field="burn"
+        label="Burn"
+        placeholder="0"
+        minvalue="0"
+        size="sm"
+        hidden="true"
+      ></numberfield>
+      <numberfield
+        width="100px"
+        field="blast"
+        label="Blast"
+        placeholder="0"
+        minvalue="0"
+        size="sm"
+        hidden="true"
+      ></numberfield>
+      <numberfield
+        width="100px"
+        field="concussive"
+        label="Concussive"
+        placeholder="0"
+        size="sm"
+        minvalue="0"
+        hidden="true"
+      ></numberfield>
+      <numberfield
+        width="100px"
+        field="cumbersome"
+        label="Cumbersome"
+        size="sm"
+        placeholder="0"
+        minvalue="0"
+        hidden="true"
+      ></numberfield>
+      <numberfield
+        width="100px"
+        field="defensive"
+        label="Defensive"
+        size="sm"
+        placeholder="0"
+        minvalue="0"
+        hidden="true"
+      ></numberfield>
+      <numberfield
+        width="100px"
+        field="deflection"
+        label="Deflection"
+        size="sm"
+        placeholder="0"
+        minvalue="0"
+        hidden="true"
+      ></numberfield>
+      <numberfield
+        width="100px"
+        field="disorient"
+        label="Disorient"
+        size="sm"
+        placeholder="0"
+        minvalue="0"
+        hidden="true"
+      ></numberfield>
+      <numberfield
+        width="100px"
+        size="sm"
+        field="ensnare"
+        label="Ensnare"
+        placeholder="0"
+        minvalue="0"
+        hidden="true"
+      ></numberfield>
+      <numberfield
+        width="100px"
+        size="sm"
+        field="guided"
+        label="Guided"
+        placeholder="0"
+        minvalue="0"
+        hidden="true"
+      ></numberfield>
+      <numberfield
+        width="100px"
+        size="sm"
+        field="inaccurate"
+        label="Inaccurate"
+        placeholder="0"
+        minvalue="0"
+        hidden="true"
+      ></numberfield>
+      <numberfield
+        width="100px"
+        size="sm"
+        field="limitedAmmo"
+        label="Limited Ammo"
+        placeholder="0"
+        minvalue="0"
+        hidden="true"
+      ></numberfield>
+      <numberfield
+        width="100px"
+        size="sm"
+        field="linked"
+        label="Linked"
+        placeholder="0"
+        minvalue="0"
+        hidden="true"
+      ></numberfield>
+      <numberfield
+        width="100px"
+        field="pierce"
+        label="Pierce"
+        placeholder="0"
+        minvalue="0"
+        hidden="true"
+        size="sm"
+      ></numberfield>
+      <numberfield
+        width="100px"
+        field="prepare"
+        label="Prepare"
+        placeholder="0"
+        minvalue="0"
+        hidden="true"
+        size="sm"
+      ></numberfield>
+      <numberfield
+        width="100px"
+        field="slowFiring"
+        label="Slow-Firing"
+        size="sm"
+        placeholder="0"
+        minvalue="0"
+        hidden="true"
+      ></numberfield>
+      <numberfield
+        width="100px"
+        field="stun"
+        size="sm"
+        label="Stun"
+        placeholder="0"
+        minvalue="0"
+        hidden="true"
+      ></numberfield>
+      <numberfield
+        width="100px"
+        size="sm"
+        field="tractor"
+        label="Tractor"
+        placeholder="0"
+        minvalue="0"
+        hidden="true"
+      ></numberfield>
+      <numberfield
+        width="100px"
+        field="vicious"
+        size="sm"
+        label="Vicious"
+        placeholder="0"
+        minvalue="0"
+        hidden="true"
+      ></numberfield>
+    </div>
+  </box>
+
+  <!-- Description -->
+
+  <div style="margin-top: 8px">
+    <divider label="Description"></divider>
+  </div>
+
+  <div style="margin-top: 8px">
+    <richtextfield
+      field="description"
+      label="Description"
+      placeholder="Enter Item description..."
+      hidewhenidentified="false"
+    >
+    </richtextfield>
+  </div>
+
+  <stringfield
+    field="unidentifiedDescription"
+    label="Unidentified Description"
+    placeholder="Enter description..."
+    multiline="true"
+    hidewhenidentified="true"
+  >
+  </stringfield>
+</div>

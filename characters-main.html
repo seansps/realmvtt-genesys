@@ -12,7 +12,7 @@
   function onDropSpecies(type, recordLink) {
     const species = record?.data?.species || [];
     const speciesName = recordLink.tooltip;
-    const speciesObj = { ...recordLink.value, icon: "IconAlien" };
+    const speciesObj = { ...recordLink.value, icon: "IconMan" };
 
     const setValues = (updatedRecord) => {
       // Set species name, initial characteristics, initial XP
@@ -38,7 +38,9 @@
 
       // First set the values, then update the attributes to get the new thresholds
       api.setValues(valuesToSet, (updatedRecord2) => {
-        updateAttributes(updatedRecord2);
+        api.getRecord(record.recordType, record._id, (actualRecord) => {
+          updateAttributes(actualRecord);
+        });
       });
     };
 
@@ -207,8 +209,8 @@
           width="100%"
           size="md"
           field="speciesName"
-          placeholder="Drag and drop a Species"
-          label="Species"
+          placeholder="Drag and drop an Archetype"
+          label="Archetype"
         ></stringfield>
         <list
           width="fit-content"

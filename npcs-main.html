@@ -6,8 +6,8 @@
       onDropItem(recordLink);
     } else if (type === "talents") {
       onDropTalent(recordLink);
-    } else if (type === "force_powers") {
-      onDropForcePower(recordLink);
+    } else if (type === "abilities") {
+      onDropAbility(recordLink);
     } else if (type === "npcs" && isVehicle(recordLink.value)) {
       api.setValue("data.activeVehicle", [recordLink.value]);
     }
@@ -232,21 +232,19 @@
     rollInitiative(record);
   }
 
-  function onDropForcePower(recordLink) {
-    const forcePower = recordLink?.value;
+  function onDropAbility(recordLink) {
+    const ability = recordLink?.value;
     api.addValue(`data.features`, {
-      ...forcePower,
+      ...ability,
       data: {
-        ...forcePower?.data,
-        isForcePower: true,
+        ...ability?.data,
       },
       fields: {
-        ...forcePower?.fields,
-        // Show the portrait for force powers
+        ...ability?.fields,
+        // Show the portrait for abilities
         abilityPortrait: {
           hidden: false,
         },
-        // Hide the icon button for force powers
         customAbility: {
           hidden: true,
         },
@@ -481,31 +479,6 @@
           {"value": "nemesis", "label": "Nemesis"}, {"value": "vehicle", "label": "Vehicle"}]'
         ></dropdown>
 
-        <stringfield
-          width="100%"
-          size="sm"
-          field="subtype"
-          label="Subtype"
-          placeholder="Enter Subtype..."
-        ></stringfield>
-      </div>
-
-      <div
-        style="
-          display: flex;
-          flex-direction: row;
-          gap: 4px;
-          align-items: flex-end;
-        "
-      >
-        <stringfield
-          width="100%"
-          size="sm"
-          field="speciesName"
-          placeholder="Enter species..."
-          label="Species"
-        ></stringfield>
-
         <dropdown
           width="100%"
           field="size"
@@ -524,6 +497,23 @@
   {"value": "Silhouette 9", "label": "Silhouette 9"}, 
   {"value": "Silhouette 10", "label": "Silhouette 10"}]'
         ></dropdown>
+      </div>
+
+      <div
+        style="
+          display: flex;
+          flex-direction: row;
+          gap: 4px;
+          align-items: flex-end;
+        "
+      >
+        <stringfield
+          width="100%"
+          size="sm"
+          field="subtype"
+          label="Subtype"
+          placeholder="Enter Subtype..."
+        ></stringfield>
       </div>
     </div>
   </div>
@@ -1188,47 +1178,4 @@
       onchange="onChangeConditions();"
     ></list>
   </div>
-
-  <!-- Force Rating -->
-  <box field="creatureAbilities">
-    <divider label="Force Rating"></divider>
-    <div
-      style="
-        display: flex;
-        flex-direction: row;
-        gap: 6px;
-        width: 100%;
-        justify-content: center;
-      "
-    >
-      <numberfield
-        placeholder="0"
-        size="xs"
-        width="120px"
-        field="forceRating"
-        label="Total Force Rating"
-        onchange="updateForceRating()"
-      ></numberfield>
-
-      <numberfield
-        placeholder="0"
-        size="xs"
-        width="100px"
-        field="committedForce"
-        label="Committed"
-        onchange="updateForceRating()"
-        minvalue="0"
-      ></numberfield>
-
-      <numberfield
-        placeholder="0"
-        size="xs"
-        width="100px"
-        field="remainingForce"
-        hidecontrols="true"
-        label="Remaining"
-        editable="false"
-      ></numberfield>
-    </div>
-  </box>
 </div>

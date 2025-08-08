@@ -488,7 +488,7 @@
         {"label": "Ranged Weapon", "value": "ranged weapon"},  {"label": "Armor", "value": "armor"}, 
         {"label": "Weapon Attachment", "value": "weapon attachment"}, 
         {"label": "Armor Attachment", "value": "armor attachment"}, 
-        {"label": "Starship or Vehicle Modification", "value": "vehicle attachment"}, 
+        {"label": "Vehicle Modification", "value": "vehicle attachment"}, 
         {"label": "Item Pack", "value": "pack"}]'
       >
       </dropdown>
@@ -559,14 +559,12 @@
 
   <box field="weaponProperties" hidden="true" hidewhenidentified="false">
     <div style="display: flex; flex-direction: row; width: 100%; gap: 8px">
-      <dropdown
+      <stringfield
         width="100%"
         field="weaponSkill"
         label="Weapon Skill"
-        placeholder="Select Weapon Skill..."
-        optionsfunction="return getWeaponSkillOptions();"
-      >
-      </dropdown>
+        placeholder="Enter Weapon Skill..."
+      ></stringfield>
       <numberfield
         width="100%"
         field="damage"
@@ -1038,15 +1036,13 @@
         placeholder="0"
       ></stringfield>
     </div>
-    <dropdown
+    <stringfield
       width="100%"
       field="skillCheck"
       label="Skill Check"
-      searchable="true"
       description="Skill to Roll when used, if applicable"
-      placeholder="Select Skill Check..."
-      options='[{"label": "None", "value": "None"}, {"label": "Astrogation", "value": "Astrogation"}, {"label": "Athletics", "value": "Athletics"}, {"label": "Brawl", "value": "Brawl"}, {"label": "Charm", "value": "Charm"}, {"label": "Coercion", "value": "Coercion"}, {"label": "Computers", "value": "Computers"}, {"label": "Cool", "value": "Cool"}, {"label": "Coordination", "value": "Coordination"}, {"label": "Core Worlds", "value": "Core Worlds"}, {"label": "Deception", "value": "Deception"}, {"label": "Discipline", "value": "Discipline"}, {"label": "Education", "value": "Education"}, {"label": "Gunnery", "value": "Gunnery"}, {"label": "Leadership", "value": "Leadership"}, {"label": "Lightsaber", "value": "Lightsaber"}, {"label": "Lore", "value": "Lore"}, {"label": "Mechanics", "value": "Mechanics"}, {"label": "Medicine", "value": "Medicine"}, {"label": "Melee", "value": "Melee"}, {"label": "Negotiation", "value": "Negotiation"}, {"label": "Outer Rim", "value": "Outer Rim"}, {"label": "Perception", "value": "Perception"}, {"label": "Piloting (Planetary)", "value": "Piloting (Planetary)"}, {"label": "Piloting (Space)", "value": "Piloting (Space)"}, {"label": "Ranged (Heavy)", "value": "Ranged (Heavy)"}, {"label": "Ranged (Light)", "value": "Ranged (Light)"}, {"label": "Resilience", "value": "Resilience"}, {"label": "Skulduggery", "value": "Skulduggery"}, {"label": "Stealth", "value": "Stealth"}, {"label": "Streetwise", "value": "Streetwise"}, {"label": "Survival", "value": "Survival"}, {"label": "Underworld", "value": "Underworld"}, {"label": "Vigilance", "value": "Vigilance"}, {"label": "Xenology", "value": "Xenology"}]'
-    ></dropdown>
+      placeholder="Enter Skill Check..."
+    ></stringfield>
   </box>
 
   <!-- Pack Properties -->

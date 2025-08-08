@@ -165,7 +165,7 @@
       width="120px"
       field="groupFilter"
       disablediflocked="false"
-      options='[{"label": "All", "value": ""}, {"label": "General", "value": "General"}, {"label": "Combat", "value": "Combat"}, {"label": "Knowledge", "value": "Knowledge"}]'
+      optionsfunction="return getGenesysSkillGroups();"
       size="xs"
       label="Filter by Group"
       placeholder="All"
@@ -224,5 +224,10 @@
     <div style="width: 170px"></div>
     <box field="skillsSpacer" width="30px" hideonlocked="true"> </box>
   </div>
-  <list listtype="skill_list" field="skills" height="100%" variant="striped"></list>
+  <list
+    listtype="skill_list"
+    field="skills"
+    height="100%"
+    variant="striped"
+  ></list>
 </div>
