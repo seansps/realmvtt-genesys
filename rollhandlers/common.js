@@ -2180,53 +2180,33 @@ function rollAttack(
     let difficulty = "Easy";
     // Ranged difficulty is based on the range band
     // Distance is used for base difficulty on personal scale
-    if (scale === "personal") {
-      if (narrativeDistance === "Engaged") {
-        difficulty = "Easy";
-        // Add modifiers if engaged w/ specific skills
-        if (skillObj.name === "Ranged (Light)") {
-          difficultyIncrease += 1;
-        } else if (skillObj.name === "Ranged (Heavy)") {
-          difficultyIncrease += 2;
-        } else if (skillObj.name === "Gunnery") {
-          // Technically impossible - show error
-          api.showNotification(
-            "Gunnery is impossible to use when Engaged with a target.",
-            "red",
-            "Impossible Roll"
-          );
-          return;
-        }
-      } else if (narrativeDistance === "Short") {
-        difficulty = "Easy";
-      } else if (narrativeDistance === "Medium") {
-        difficulty = "Average";
-      } else if (narrativeDistance === "Long") {
-        difficulty = "Hard";
-      } else if (narrativeDistance === "Extreme") {
-        difficulty = "Daunting";
+    // AND for planetary scale, unlike in SWRPG where it planetary scale is based on silhouette
+    if (narrativeDistance === "Engaged") {
+      difficulty = "Easy";
+      // Add modifiers if engaged w/ specific skills
+      if (skillObj.name === "Ranged (Light)") {
+        difficultyIncrease += 1;
+      } else if (skillObj.name === "Ranged (Heavy)") {
+        difficultyIncrease += 2;
+      } else if (skillObj.name === "Gunnery") {
+        // Technically impossible - show error
+        api.showNotification(
+          "Gunnery is impossible to use when Engaged with a target.",
+          "red",
+          "Impossible Roll"
+        );
+        return;
       }
-    } else {
-      // In planetary scale, difficulty is dependent on silhouette of target
-      // vs our silhouette according to Table 7-4: Silhouette Comparison
-      const silhouetteDifference = ourSilhouetteNumber - targetSilhouetteNumber;
-
-      if (silhouetteDifference >= 4) {
-        // Firing vessel has a silhouette four or more points larger than target ship
-        difficulty = "Formidable";
-      } else if (silhouetteDifference === 3) {
-        // Firing vessel has a silhouette three points larger than the target ship
-        difficulty = "Daunting";
-      } else if (silhouetteDifference === 2) {
-        // Firing vessel has a silhouette two points larger than the target ship
-        difficulty = "Hard";
-      } else if (silhouetteDifference <= -2) {
-        // Firing vessel has a silhouette two or more points smaller than the target vessel
-        difficulty = "Easy";
-      } else {
-        // Firing vessel has the same silhouette as target, or the silhouette is one larger or smaller than the target
-        difficulty = "Average";
-      }
+    } else if (narrativeDistance === "Short") {
+      difficulty = "Easy";
+    } else if (narrativeDistance === "Medium") {
+      difficulty = "Average";
+    } else if (narrativeDistance === "Long") {
+      difficulty = "Hard";
+    } else if (narrativeDistance === "Extreme") {
+      difficulty = "Daunting";
+    } else if (narrativeDistance === "Strategic") {
+      difficulty = "Formidable";
     }
 
     // Increase difficulty if the weapon has cumbersome and their brawn is deficient
@@ -2302,63 +2282,21 @@ function rollAttack(
     }
 
     // Get target's defense and apply as setback
-    const targetDefense = isMelee
+    let targetDefense = isMelee
       ? token?.data?.defenseMelee || 0
       : token?.data?.defenseRanged || 0;
+
+    // If target is a vehicle, use `defense` instead of `defenseRanged`
+    if (token.data?.type === "vehicle") {
+      targetDefense = token?.data?.defense || 0;
+    }
+
     if (targetDefense > 0) {
       modifiers.push({
         name: "Target Defense",
         value: `${targetDefense} setback`,
         active: true,
       });
-    }
-
-    // For vehicles, we don't know the firing arc, so we
-    // set each shield defense as an optional setback modifier
-    if (token.data?.type === "vehicle") {
-      const shieldDefenses = [
-        { name: "Fore Defense", value: "defFore" },
-        { name: "Aft Defense", value: "defAft" },
-        { name: "Port Defense", value: "defPort" },
-        { name: "Starboard Defense", value: "defStarboard" },
-      ];
-
-      // Check if this is a small ship (silhouette 4 or lower)
-      const isSmallShip = targetSilhouetteNumber <= 4;
-
-      // For small ships, find the highest defense and set it as active
-      if (isSmallShip) {
-        let highestDefense = 0;
-        let highestDefenseName = "";
-
-        shieldDefenses.forEach(({ name, value }) => {
-          const defenseValue = token.data?.[value] || 0;
-          if (defenseValue > highestDefense) {
-            highestDefense = defenseValue;
-            highestDefenseName = name;
-          }
-        });
-
-        // Add only the highest defense as active
-        if (highestDefense > 0) {
-          modifiers.push({
-            name: `${highestDefenseName}`,
-            value: `${highestDefense} setback`,
-            active: true,
-          });
-        }
-      } else {
-        // For larger ships (silhouette 5+), all defenses are optional
-        shieldDefenses.forEach(({ name, value }) => {
-          if (token.data?.[value] && token.data?.[value] > 0) {
-            modifiers.push({
-              name: name,
-              value: `${token.data?.[value] || 0} setback`,
-              active: false,
-            });
-          }
-        });
-      }
     }
 
     // Get modifiers for attacksTargetingYou on token

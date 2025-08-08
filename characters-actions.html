@@ -1,7 +1,9 @@
 <script>
   function onDrop(type, recordlink) {
     if (type === "npcs" && isVehicle(recordlink.value)) {
-      api.setValue("data.activeVehicle", [recordlink.value]);
+      api.setValue("data.activeVehicle", [
+        { ...recordlink.value, icon: "IconCarSuv" },
+      ]);
     } else if (type === "abilities") {
       onDropAbility(type, recordlink);
     }
@@ -39,7 +41,7 @@
       width="fit-content"
       options='[{"label": "Engaged", "value": "Engaged"}, {"label": "Short", "value": "Short"},
         {"label": "Medium", "value": "Medium"}, {"label": "Long", "value": "Long"},
-        {"label": "Extreme", "value": "Extreme"}]'
+        {"label": "Extreme", "value": "Extreme"}, {"label": "Strategic", "value": "Strategic"}]'
     ></dropdown>
     <div
       style="

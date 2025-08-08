@@ -9,7 +9,9 @@
     } else if (type === "abilities") {
       onDropAbility(recordLink);
     } else if (type === "npcs" && isVehicle(recordLink.value)) {
-      api.setValue("data.activeVehicle", [recordLink.value]);
+      api.setValue("data.activeVehicle", [
+        { ...recordLink.value, icon: "IconCarSuv" },
+      ]);
     }
   }
 
@@ -933,124 +935,34 @@
       <numberfield
         width="80px"
         size="xs"
+        field="defense"
+        textalign="center"
+        label="Defense"
+        placeholder="0"
+        color="violet"
+      ></numberfield>
+      <numberfield
+        width="80px"
+        size="xs"
         field="speed"
-        label="Speed"
+        label="Max Speed"
+        placeholder="0"
+      ></numberfield>
+      <numberfield
+        width="80px"
+        size="xs"
+        field="currentSpeed"
+        label="Current Speed"
         placeholder="0"
       ></numberfield>
       <numberfield
         width="80px"
         size="xs"
         field="handling"
+        showsign="true"
         label="Handling"
         placeholder="0"
       ></numberfield>
-    </div>
-
-    <!-- Defense Ratings -->
-    <div style="margin-bottom: 8px">
-      <label
-        variant="bold"
-        size="sm"
-        textalign="center"
-        label="Defense and Current Speed"
-      ></label>
-      <div
-        style="
-          display: grid;
-          grid-template-columns: 1fr 1fr 1fr;
-          grid-template-rows: auto auto auto;
-          gap: 4px;
-          max-width: 300px;
-          margin: 0 auto;
-          position: relative;
-          padding: 0px 8px 8px 8px;
-          background: linear-gradient(
-            45deg,
-            rgba(147, 51, 234, 0.1),
-            rgba(79, 70, 229, 0.1)
-          );
-          border-radius: 8px;
-          border: 1px solid rgba(147, 51, 234, 0.2);
-          margin-top: 4px;
-        "
-      >
-        <!-- Top row - Fore -->
-        <div
-          style="
-            grid-column: 2;
-            grid-row: 1;
-            display: flex;
-            justify-content: center;
-          "
-        >
-          <numberfield
-            width="80px"
-            size="xs"
-            field="defFore"
-            textalign="center"
-            label="Fore"
-            placeholder="--"
-            color="violet"
-          ></numberfield>
-        </div>
-        <!-- Middle row - Port and Starboard -->
-        <div
-          style="
-            grid-column: 1;
-            grid-row: 2;
-            display: flex;
-            justify-content: center;
-          "
-        >
-          <numberfield
-            width="80px"
-            size="xs"
-            field="defPort"
-            color="violet"
-            textalign="center"
-            label="Port"
-            placeholder="--"
-          ></numberfield>
-        </div>
-
-        <div
-          style="
-            grid-column: 3;
-            grid-row: 2;
-            display: flex;
-            justify-content: center;
-          "
-        >
-          <numberfield
-            width="80px"
-            size="xs"
-            field="defStarboard"
-            color="violet"
-            textalign="center"
-            label="Starboard"
-            placeholder="--"
-          ></numberfield>
-        </div>
-        <!-- Bottom row - Aft -->
-        <div
-          style="
-            grid-column: 2;
-            grid-row: 3;
-            display: flex;
-            justify-content: center;
-          "
-        >
-          <numberfield
-            width="80px"
-            size="xs"
-            field="defAft"
-            color="violet"
-            textalign="center"
-            label="Aft"
-            placeholder="--"
-          ></numberfield>
-        </div>
-      </div>
     </div>
   </box>
 
