@@ -39,6 +39,7 @@
       "stun",
       "tractor",
       "vicious",
+      "unwieldy",
     ];
 
     qualityFields.forEach((field) => {
@@ -140,7 +141,6 @@
         {"label": "Burn (Active)", "value": "burn"}, 
         {"label": "Blast (Active)", "value": "blast"}, 
         {"label": "Concussive (Active)", "value": "concussive"}, 
-        {"label": "Cortosis (Passive)", "value": "cortosis"}, 
         {"label": "Cumbersome (Passive)", "value": "cumbersome"}, 
         {"label": "Defensive (Passive)", "value": "defensive"}, 
         {"label": "Deflection (Passive)", "value": "deflection"}, 
@@ -155,14 +155,15 @@
         {"label": "Linked (Active)", "value": "linked"}, 
         {"label": "Pierce (Passive)", "value": "pierce"}, 
         {"label": "Prepare (Passive)", "value": "prepare"},
+        {"label": "Reinforced (Passive)", "value": "reinforced"}, 
         {"label": "Slow-Firing (Passive)", "value": "slow-firing"}, 
         {"label": "Stun (Active)", "value": "stun"}, 
         {"label": "Stun Damage (Passive)", "value": "stun-damage"},
-        {"label": "Stun Damage (Passive, Droid only)", "value": "stun-damage-droid"},
         {"label": "Stun Setting", "value": "stun-setting"},
         {"label": "Sunder (Active)", "value": "sunder"}, 
         {"label": "Superior (Passive)", "value": "superior"}, 
         {"label": "Tractor (Passive)", "value": "tractor"}, 
+        {"label": "Unwieldy (Passive)", "value": "unwieldy"},
         {"label": "Vicious (Passive)", "value": "vicious"}, 
         {"label": "Unarmed", "value": "unarmed"}]'
       ></dropdown>
@@ -344,6 +345,14 @@
         size="sm"
         field="tractor"
         label="Tractor"
+        placeholder="0"
+        minvalue="0"
+        hidden="true"
+      ></numberfield>
+      <numberfield
+        width="100px"
+        field="unwieldy"
+        label="Unwieldy"
         placeholder="0"
         minvalue="0"
         hidden="true"

@@ -824,11 +824,11 @@ function getTagsForQualities(weapon) {
     });
   }
 
-  if (qualities.includes("cortosis")) {
+  if (qualities.includes("reinforced")) {
     tags.push({
-      name: "Cortosis (Passive)",
+      name: "Reinforced (Passive)",
       tooltip:
-        "Weapons with the Cortosis quality are immune to the Sunder quality. Armor with the Cortosis quality makes the wearer's soak immune to the Pierce and Breach qualities.",
+        "Weapons with the Reinforced quality are immune to the Sunder quality. Armor with the Reinforced quality makes the wearer's soak immune to the Pierce and Breach qualities.",
     });
   }
 
@@ -1018,6 +1018,14 @@ function getTagsForQualities(weapon) {
     tags.push({
       name: "Vicious (Passive)",
       tooltip: "Add 10 * Vicious rating to critical injury results.",
+    });
+  }
+
+  if (qualities.includes("unwieldy")) {
+    tags.push({
+      name: `Unwieldy (Passive) [${weapon.data?.unwieldy || 0}]`,
+      tooltip:
+        "To wield an Unwieldy weapon properly, the character needs an Agility characteristic equal to or greater than the weapon's Unwieldy rating.",
     });
   }
 
@@ -2472,16 +2480,16 @@ function getHealingMacro(healing, deduct = false) {
   \`\`\``;
 }
 
-function targetHasCortosis(target) {
+function targetHasReinforced(target) {
   // Get best equipped armor
   const bestArmor = getBestArmor(target);
   if (!bestArmor.armor) {
     return false;
   }
 
-  // Check if the best armor is cortosis
+  // Check if the best armor is reinforced
   const special = bestArmor.armor?.data?.special || [];
-  return special.includes("cortosis");
+  return special.includes("reinforced");
 }
 
 function getDamageMacro({
@@ -2520,18 +2528,18 @@ function getDamageMacro({
     // Breach ignores vehicle 1 armor and 10 soak
     // for each point of breach
     let breachValue = ${breach};
-    // Pierce ignores 1 soak for each point unless cortosis
+    // Pierce ignores 1 soak for each point unless reinforced
     let pierceValue = ${pierce};
     if (target.data?.type !== "vehicle") {
       // In personal scale, breach ignores 10x 
       breachValue = 10 * breachValue;
     }
-    // Check if the target has cortosis armor before applying breach or pierce
-    const hasCortosis = targetHasCortosis(target);
-    if (breachValue > 0 && !hasCortosis) {
+    // Check if the target has reinforced armor before applying breach or pierce
+    const hasReinforced = targetHasReinforced(target);
+    if (breachValue > 0 && !hasReinforced) {
       soakValue = Math.max(0, soakValue - breachValue);
     }
-    if (pierceValue > 0 && !hasCortosis) {
+    if (pierceValue > 0 && !hasReinforced) {
       soakValue = Math.max(0, soakValue - pierceValue);
     }
 
