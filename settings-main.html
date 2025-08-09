@@ -1,0 +1,57 @@
+<script>
+  function loadAllSkills() {
+    const allSkills = getAllGenesysSkills();
+    // Create array of all skill objects
+    const skillObjects = allSkills.map((skill) => ({
+      _id: generateUuid(),
+      name: skill.name,
+      unidentifiedName: skill.name,
+      recordType: "skill",
+      identified: true,
+      icon: "IconTools",
+      data: {
+        group: skill.group,
+        stat: skill.stat,
+      },
+    }));
+
+    // Set all skills at once
+    api.setValues({
+      "data.skills": skillObjects,
+    });
+  }
+</script>
+
+<label
+  textalign="center"
+  field="name"
+  label="Setting Skills"
+  size="md"
+  variant="bold"
+>
+</label>
+
+<button
+  field="loadSkillsBtn"
+  label="Load Base Skills"
+  variant="outline"
+  size="xs"
+  onclick="loadAllSkills()"
+></button>
+
+<list field="skills" listtype="setting_skill_list"></list>
+
+<label
+  textalign="center"
+  field="name"
+  label="Setting Description"
+  size="md"
+  variant="bold"
+></label>
+<richtextfield
+  field="description"
+  label="Description"
+  placeholder="Enter Item description..."
+  hidewhenidentified="false"
+>
+</richtextfield>

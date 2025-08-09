@@ -1138,25 +1138,27 @@ function initializeSkills(record) {
     }
   };
 
-  // Only initialize if no skills exist
-  if (existingSkills.length === 0) {
-    // TODO after adding Settings, get from active setting,
-    // Else get generic Genesys skills
-    const allSkills = getAllGenesysSkills();
+  const addSkills = (skills) => {
+    // Get generic Genesys skills
+    let skillObjects = [...(skills || [])];
 
-    // Create array of all skill objects
-    const skillObjects = allSkills.map((skill) => ({
-      _id: generateUuid(),
-      name: skill.name,
-      unidentifiedName: skill.name,
-      recordType: "skill",
-      identified: true,
-      icon: "IconTools",
-      data: {
-        group: skill.group,
-        stat: skill.stat,
-      },
-    }));
+    if (skillObjects.length === 0) {
+      const allSkills = getAllGenesysSkills();
+
+      // Create array of all skill objects
+      skillObjects = allSkills.map((skill) => ({
+        _id: generateUuid(),
+        name: skill.name,
+        unidentifiedName: skill.name,
+        recordType: "skill",
+        identified: true,
+        icon: "IconTools",
+        data: {
+          group: skill.group,
+          stat: skill.stat,
+        },
+      }));
+    }
 
     // Set all skills at once
     api.setValues(
@@ -1165,8 +1167,35 @@ function initializeSkills(record) {
       },
       addUnarmedIfNeeded
     );
-  } else {
-    addUnarmedIfNeeded();
+  };
+
+  // Only initialize if no skills exist
+  if (existingSkills.length === 0) {
+    // Prompt user to select a setting
+    const optionsQuery = {
+      type: "settings",
+      query: {},
+    };
+
+    api.showPrompt(
+      `Select a Setting for Skills`,
+      "Setting",
+      "Select a Setting...",
+      null,
+      optionsQuery,
+      (value) => {
+        if (value.length > 0) {
+          const setting = value[0];
+          if (setting?.data?.skills) {
+            addSkills(setting.data.skills);
+          } else {
+            addSkills();
+          }
+        } else {
+          addSkills();
+        }
+      }
+    );
   }
 }
 

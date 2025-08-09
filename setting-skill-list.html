@@ -1,0 +1,42 @@
+<div
+  style="
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    align-items: center;
+    min-width: 150px;
+  "
+>
+  <div style="min-width: 60px; width: 100%">
+    <namefield
+      placeholder="Skill name..."
+      size="xs"
+      width="100%"
+      field="namefield"
+      variant="tooltip-underline"
+    ></namefield>
+  </div>
+
+  <stringfield
+    placeholder="Group..."
+    size="xs"
+    width="150px"
+    label="Group"
+    field="group"
+    variant="tooltip-underline"
+  ></stringfield>
+
+  <dropdown
+    size="xs"
+    field="stat"
+    variant="default"
+    placeholder="Characteristic..."
+    width="210px"
+    options='[{"label": "Brawn", "value": "brawn"}, 
+      {"label": "Agility", "value": "agility"}, 
+      {"label": "Intellect", "value": "intellect"}, 
+      {"label": "Cunning", "value": "cunning"}, 
+      {"label": "Willpower", "value": "willpower"}, 
+      {"label": "Presence", "value": "presence"}]'
+  ></dropdown>
+</div>
