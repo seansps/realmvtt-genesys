@@ -2469,7 +2469,7 @@ function getDamageForMacroForAttack({
 
 function getHealingMacro(healing, deduct = false) {
   // Apply healing to targets -- if deduct is true,
-  // then deduct from the healing the amount of stims used today
+  // then deduct from the healing the amount of healing items used today
   return `\`\`\`Apply_Healing
   let targets = api.getSelectedOrDroppedToken();
   targets.forEach(target => {
@@ -2483,7 +2483,7 @@ function getHealingMacro(healing, deduct = false) {
       healingToApply -= usedStims;
       oldValues["data.healingUsed"] = usedStims;
       valuesToSet["data.healingUsed"] = usedStims + 1;
-      deductMessage = \` (Deducted \${usedStims} stims used today.)\`;
+      deductMessage = \` (Deducted \${usedStims} healing items used today.)\`;
     }
     message += \`Healed \${healingToApply} wounds\${deductMessage}.\\n\`;
     if (healingToApply > 0) {
