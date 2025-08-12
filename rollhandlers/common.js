@@ -1800,7 +1800,48 @@ function useAbility(record, ability, dataPathToAbility) {
   const description = ability.data?.description || "";
 
   const skillRoll = ability.data?.skill || ability.data?.skillCheck || "";
-  const difficulty = ability.data?.difficulty || "";
+  let difficulty = ability.data?.difficulty || "";
+
+  let difficultyNumber = 0;
+  if (difficulty === "Easy") {
+    difficultyNumber = 1;
+  } else if (difficulty === "Average") {
+    difficultyNumber = 2;
+  } else if (difficulty === "Hard") {
+    difficultyNumber = 3;
+  } else if (difficulty === "Daunting") {
+    difficultyNumber = 4;
+  } else if (difficulty === "Formidable") {
+    difficultyNumber = 5;
+  }
+
+  // Check for additional effects
+  let additionalEffectsText = "";
+  const additionalEffects = ability.data?.abilityUpgrades || [];
+  additionalEffects.forEach((effect) => {
+    if (effect.data?.active) {
+      const effectName = effect.name;
+      difficultyNumber += effect.data?.increaseDifficulty || 0;
+      const effectDescription = api.richTextToMarkdown(
+        effect.data?.description || ""
+      );
+      additionalEffectsText += `#### ${effectName}\n${effectDescription}\n`;
+    }
+  });
+
+  // Convert difficulty number to difficulty string
+  difficultyNumber = Math.min(difficultyNumber, 5);
+  if (difficultyNumber === 1) {
+    difficulty = "Easy";
+  } else if (difficultyNumber === 2) {
+    difficulty = "Average";
+  } else if (difficultyNumber === 3) {
+    difficulty = "Hard";
+  } else if (difficultyNumber === 4) {
+    difficulty = "Daunting";
+  } else if (difficultyNumber === 5) {
+    difficulty = "Formidable";
+  }
 
   const itemIcon = portrait
     ? `![${abilityName}](${assetUrl}${portrait}?width=40&height=40) `
@@ -1832,6 +1873,8 @@ function useAbility(record, ability, dataPathToAbility) {
 
   ---
   ${abilityDescription}
+
+  ${additionalEffectsText}
   `;
 
   let type =
