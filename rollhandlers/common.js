@@ -1844,7 +1844,7 @@ function useAbility(record, ability, dataPathToAbility) {
   }
 
   const itemIcon = portrait
-    ? `![${abilityName}](${assetUrl}${portrait}?width=40&height=40) `
+    ? `![${abilityName}](${assetUrl}${encodeURI(portrait)}?width=40&height=40) `
     : "";
   const abilityDescription = api.richTextToMarkdown(description || "");
 
@@ -2877,7 +2877,7 @@ function useItem(record, itemDataPath) {
   const portrait = api.getValueOnRecord(record, `${itemDataPath}.portrait`);
 
   const itemIcon = portrait
-    ? `![${itemName}](${assetUrl}${portrait}?width=40&height=40) `
+    ? `![${itemName}](${assetUrl}${encodeURI(portrait)}?width=40&height=40) `
     : "";
   const itemDescription = api.richTextToMarkdown(description || "");
   let markdownDescription = `
