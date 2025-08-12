@@ -89,13 +89,24 @@
         margin-bottom: 4px;
       "
     >
-      <stringfield
-        width="100%"
-        size="sm"
-        field="skillCheck"
-        label="Skill"
-        placeholder="Enter Skill to Roll if Applicable..."
-      ></stringfield>
+      <div style="display: flex; flex-direction: row; width: 100%; gap: 8px">
+        <stringfield
+          width="100%"
+          size="sm"
+          field="skillCheck"
+          label="Skill"
+          placeholder="Skill if Applicable..."
+        ></stringfield>
+        <dropdown
+          width="100%"
+          field="range"
+          label="Range"
+          placeholder="Select Range..."
+          options='[{"label": "Engaged", "value": "Engaged"}, {"label": "Short", "value": "Short"},
+        {"label": "Medium", "value": "Medium"}, {"label": "Long", "value": "Long"},
+        {"label": "Extreme", "value": "Extreme"}]'
+        ></dropdown>
+      </div>
       <div style="display: flex; flex-direction: row; width: 100%; gap: 8px">
         <numberfield
           field="damage"
@@ -107,8 +118,36 @@
           onchange="onDamageChange(value);"
           hidewhenidentified="false"
         ></numberfield>
+        <numberfield
+          field="healing"
+          size="sm"
+          width="100%"
+          label="Heal Wounds"
+          placeholder="0"
+          minvalue="0"
+          hidewhenidentified="false"
+        ></numberfield>
       </div>
     </div>
+  </div>
+
+  <div style="display: flex; flex-direction: row; width: 100%; gap: 8px">
+    <dropdown
+      width="100%"
+      field="difficulty"
+      label="Base Difficulty"
+      placeholder="Select Difficulty..."
+      options='[{"label": "None", "value": "None"}, {"label": "Easy (1)", "value": "Easy"},
+  {"label": "Average (2)", "value": "Average"}, {"label": "Hard (3)", "value": "Hard"},
+  {"label": "Daunting (4)", "value": "Daunting"}, {"label": "Formidable (5)", "value": "Formidable"}]'
+    ></dropdown>
+    <numberfield
+      field="strain"
+      label="Strain Cost"
+      defaultvalue="2"
+      placeholder="2"
+      width="100%"
+    ></numberfield>
   </div>
 
   <box field="effectProperties" hidewhenidentified="false">
@@ -368,6 +407,16 @@
       ></numberfield>
     </div>
   </box>
+
+  <div style="margin-top: 4px">
+    <label
+      variant="bold"
+      size="sm"
+      textalign="center"
+      label="Additional Effects"
+    ></label>
+    <list listtype="ability_upgrades" field="abilityUpgrades"></list>
+  </div>
 
   <!-- Description -->
 

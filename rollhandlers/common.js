@@ -1799,13 +1799,31 @@ function useAbility(record, ability, dataPathToAbility) {
   const portrait = ability.portrait;
   const description = ability.data?.description || "";
 
-  const skillRoll = ability.data?.skill || "";
+  const skillRoll = ability.data?.skill || ability.data?.skillCheck || "";
   const difficulty = ability.data?.difficulty || "";
 
   const itemIcon = portrait
     ? `![${abilityName}](${assetUrl}${portrait}?width=40&height=40) `
     : "";
   const abilityDescription = api.richTextToMarkdown(description || "");
+
+  // Check if strain cost
+  if (ability.data?.strain) {
+    let cost = ability.data?.strain;
+    let strainUsed = record?.data?.strain || 0;
+    strainUsed += cost;
+    let strainRemaining =
+      record?.data?.strainRemaining || record?.data?.strainThreshold || 0;
+    strainRemaining = Math.max(0, strainRemaining - cost);
+    api.setValuesOnRecord(record, {
+      [`data.strain`]: strainUsed,
+      [`data.strainRemaining`]: strainRemaining,
+    });
+    const ourToken = api.getToken();
+    if (ourToken) {
+      api.floatText(ourToken, "+" + cost + " Strain", "#0000FF");
+    }
+  }
 
   // For abilitiies that don't have a primary skill, we use the ability name as the header
   // and output the description with the icon
@@ -1862,6 +1880,12 @@ function useAbility(record, ability, dataPathToAbility) {
     abilityText += `\n\n${effectMacros}`;
   }
 
+  // Checl for healing
+  if (ability.data?.healing) {
+    let healingMacro = getHealingMacro(ability.data?.healing);
+    abilityText += `\n\n${healingMacro}`;
+  }
+
   api.sendMessage(abilityText, undefined, [], tags);
 
   // If skillRoll, roll
@@ -1892,7 +1916,14 @@ function useAbility(record, ability, dataPathToAbility) {
     const isAttack =
       ability.data?.damage !== undefined && ability.data?.damage > 0;
     if (isAttack && dataPathToAbility) {
-      rollAttack(record, ability, dataPathToAbility, "attack");
+      rollAttack(
+        record,
+        ability,
+        dataPathToAbility,
+        "attack",
+        "personal",
+        difficulty
+      );
     } else {
       rollSkill(
         record,
@@ -2162,7 +2193,8 @@ function rollAttack(
   weapon,
   dataPathToWeapon,
   attackType = "attack",
-  scale = "personal"
+  scale = "personal",
+  difficultyOverride = undefined
 ) {
   const isMelee = weapon.data?.type === "melee weapon";
   let skill = weapon.data?.weaponSkill || weapon.data?.skillCheck || "";
@@ -2254,6 +2286,15 @@ function rollAttack(
       difficulty = "Daunting";
     } else if (narrativeDistance === "Strategic") {
       difficulty = "Formidable";
+    }
+
+    // If melee, always average
+    if (isMelee) {
+      difficulty = "Average";
+    }
+
+    if (difficultyOverride) {
+      difficulty = difficultyOverride;
     }
 
     // Increase difficulty if the weapon has cumbersome and their brawn is deficient
@@ -2497,6 +2538,15 @@ function getHealingMacro(healing, deduct = false) {
       oldValues["data.woundsRemaining"] = target.data?.woundsRemaining;
       valuesToSet["data.wounds"] = Math.max(0, target.data?.wounds - healingValue);
       valuesToSet["data.woundsRemaining"] = Math.max(0, target.data?.woundThreshold - valuesToSet["data.wounds"]);
+
+      // If it's a minion, recalculate thresholds to update skill ranks
+      if (
+        target.recordType === "npcs" &&
+        (!target.data?.type || target.data?.type === "minion")
+      ) {
+        recalculateThresholds(target, valuesToSet);
+      }
+
       api.setValuesOnRecord(target, valuesToSet);
       api.floatText(target, '+' + healingValue, "#1bc91b");
     }
