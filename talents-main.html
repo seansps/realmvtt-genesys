@@ -1,13 +1,3 @@
-<script>
-  function onChangeIsUpgrade(value) {
-    if (value === "yes") {
-      api.setHidden("specializationTrees", true);
-    } else {
-      api.setHidden("specializationTrees", false);
-    }
-  }
-</script>
-
 <div
   style="
     display: flex;
@@ -33,6 +23,13 @@
       "
     >
       <div style="display: flex; gap: 4px; align-items: flex-end">
+        <numberfield
+          width="100%"
+          field="tier"
+          label="Tier"
+          placeholder="1"
+          min="1"
+        ></numberfield>
         <dropdown
           width="100%"
           field="ranked"
@@ -40,6 +37,8 @@
           placeholder="No"
           options='[{"label": "No", "value": "no"}, {"label": "Yes", "value": "yes"}]'
         ></dropdown>
+      </div>
+      <div style="display: flex; gap: 4px; align-items: flex-end">
         <stringfield
           width="100%"
           field="activation"
@@ -47,16 +46,6 @@
           placeholder="Enter Activation..."
         ></stringfield>
       </div>
-      <dropdown
-        field="signatureAbilityUpgrade"
-        size="sm"
-        label="Signature Ability Upgrade"
-        description="Indicates this is only used on a Signature Ability tree."
-        options='[{"label": "No", "value": "no"}, {"label": "Yes", "value": "yes"}]'
-        placeholder="No"
-        defaultvalue="no"
-        onchange="onChangeIsUpgrade(value);"
-      ></dropdown>
     </div>
   </div>
 

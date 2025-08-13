@@ -722,6 +722,67 @@ function setTotalEncumbrance(record, valuesToSet) {
   }
 }
 
+function recalculateTalentLabel(record, moreValuesToSet = undefined) {
+  const talents = record?.data?.talents || [];
+
+  // Count talents by tier, considering ranked talents
+  const tierCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+  talents.forEach((talent) => {
+    const tier = talent.data?.tier || 1;
+    const rank = talent.data?.rank || 1;
+
+    if (tier >= 1 && tier <= 5) {
+      // Count the base talent in its original tier
+      tierCounts[tier]++;
+
+      // For ranked talents, each rank beyond 1 takes up a slot in the next tier
+      for (let r = 2; r <= rank; r++) {
+        const nextTier = tier + (r - 1);
+        if (nextTier <= 5) {
+          tierCounts[nextTier]++;
+        }
+      }
+    }
+  });
+
+  // Build the label according to Genesys rules
+  let label = "";
+
+  // Tier 1: (count)/(infinity symbol) - always show
+  label += `Tier 1: ${tierCounts[1]}/∞`;
+
+  // Only show other tiers if you can actually have slots in them
+  // Tier 2: (count)/(tier1 - 1) - only if tier1 > 1
+  if (tierCounts[1] > 1) {
+    label += ` | Tier 2: ${tierCounts[2]}/${tierCounts[1] - 1}`;
+
+    // Tier 3: (count)/(tier2 - 1) - only if tier2 > 1
+    if (tierCounts[2] > 1) {
+      label += ` | Tier 3: ${tierCounts[3]}/${tierCounts[2] - 1}`;
+
+      // Tier 4: (count)/(tier3 - 1) - only if tier3 > 1
+      if (tierCounts[3] > 1) {
+        label += ` | Tier 4: ${tierCounts[4]}/${tierCounts[3] - 1}`;
+
+        // Tier 5: (count)/(tier4 - 1) - only if tier4 > 1
+        if (tierCounts[4] > 1) {
+          label += ` | Tier 5: ${tierCounts[5]}/${tierCounts[4] - 1}`;
+        }
+      }
+    }
+  }
+
+  // Use your normal pattern for moreValuesToSet
+  if (moreValuesToSet) {
+    moreValuesToSet["data.talentLabel"] = label;
+  } else {
+    api.setValues({
+      "data.talentLabel": label,
+    });
+  }
+}
+
 function updateAttributes(record, moreValuesToSet = undefined) {
   const valuesToSet = moreValuesToSet || {};
 

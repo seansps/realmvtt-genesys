@@ -1,4 +1,11 @@
 <script>
+  function onLoad() {
+    const talentLabel = record?.data?.talentLabel;
+    if (talentLabel === undefined) {
+      recalculateTalentLabel(record);
+    }
+  }
+
   function onDrop(type, recordLink) {
     if (type === "specializations") {
       onDropSpecialization(type, recordLink);
@@ -38,6 +45,15 @@
     });
   }
 
+  function onChangeTalents() {
+    const valuesToSet = {};
+    recalculateTalentLabel(record, valuesToSet);
+    updateAttributes(record, valuesToSet);
+    if (Object.keys(valuesToSet).length > 0) {
+      api.setValues(valuesToSet);
+    }
+  }
+
   function onDropTalent(recordLink) {
     const talent = recordLink?.value;
     if (!talent) return;
@@ -62,21 +78,45 @@
       existingTalentIndex >= 0
     ) {
       // Update the rank
+      const newRank = (existingTalent?.data?.rank || 1) + 1;
       api.setValues(
         {
-          [`data.talents.${existingTalentIndex}.data.rank`]:
-            (existingTalent?.data?.rank || 1) + 1,
+          [`data.talents.${existingTalentIndex}.data.rank`]: newRank,
         },
         () => {
           api.getRecord(record.recordType, record._id, (actualRecord) => {
-            updateAttributes(actualRecord);
+            const valuesToSet = {};
+
+            // Calculate XP cost for the new rank
+            const baseTier = existingTalent?.data?.tier || 1;
+            const actualTier = Math.min(5, baseTier + (newRank - 1));
+
+            // Calculate cost: each rank costs the tier cost of the next tier
+            let tierCost = [5, 10, 15, 20, 25][actualTier - 1];
+
+            // Update spent XP
+            const currentSpentXp = actualRecord?.data?.spentXp || 0;
+            valuesToSet["data.spentXp"] = currentSpentXp + tierCost;
+
+            // Show notification
+            api.showNotification(
+              `Talent rank increased to ${newRank}. XP spent: ${tierCost}`,
+              "green",
+              "Talent Rank Increased"
+            );
+
+            recalculateTalentLabel(actualRecord, valuesToSet);
+            updateAttributes(actualRecord, valuesToSet);
+            if (Object.keys(valuesToSet).length > 0) {
+              api.setValues(valuesToSet);
+            }
           });
         }
       );
     } else {
       // Add the talent to the list
       const talents = [...(record?.data?.talents || [])];
-      talents.push({
+      const newTalent = {
         ...talent,
         _id: talentId,
         data: {
@@ -92,14 +132,37 @@
               .includes("active"),
           },
         },
-      });
+      };
+
+      talents.push(newTalent);
       api.setValues(
         {
           [`data.talents`]: talents,
         },
         () => {
           api.getRecord(record.recordType, record._id, (actualRecord) => {
-            updateAttributes(actualRecord);
+            const valuesToSet = {};
+
+            // Calculate XP cost for the new talent
+            const baseTier = newTalent?.data?.tier || 1;
+            const tierCost = [5, 10, 15, 20, 25][baseTier - 1];
+
+            // Update spent XP
+            const currentSpentXp = actualRecord?.data?.spentXp || 0;
+            valuesToSet["data.spentXp"] = currentSpentXp + tierCost;
+
+            // Show notification
+            api.showNotification(
+              `Talent added. XP spent: ${tierCost}`,
+              "green",
+              "Talent Added"
+            );
+
+            recalculateTalentLabel(actualRecord, valuesToSet);
+            updateAttributes(actualRecord, valuesToSet);
+            if (Object.keys(valuesToSet).length > 0) {
+              api.setValues(valuesToSet);
+            }
           });
         }
       );
@@ -133,22 +196,59 @@
 </script>
 
 <div style="display: flex; flex-direction: column; gap: 4px">
-  <dropdown
-    field="talentSetting"
-    hideonlocked="true"
-    label="Talent Style"
-    defaultvalue="pyramid"
-    onchange="onChangeTalentStyle(value);"
-    placeholder="Talent Style"
-    options='[{"label": "Talent Pyramid", "value": "pyramid"}, {"label": "Specialization Trees", "value": "trees"}]'
-  ></dropdown>
+  <label
+    variant="bold"
+    size="md"
+    label="Archetype Features"
+    textalign="center"
+  ></label>
+  <list listtype="character_species_details_list" field="species"></list>
+  <label
+    field="speciesDetailsLabel"
+    size="sm"
+    width="100%"
+    variant="unstyled"
+    textalign="center"
+    label="Drag and Drop an Archetype on the Main Tab"
+  ></label>
+
+  <label variant="bold" size="md" label="Talents" textalign="center"></label>
+
+  <div
+    style="
+      display: flex;
+      gap: 4px;
+      width: 100%;
+      margin-bottom: 8px;
+      align-items: flex-end;
+    "
+  >
+    <dropdown
+      field="talentSetting"
+      hideonlocked="true"
+      label="Talent Style"
+      defaultvalue="pyramid"
+      onload="onLoad();"
+      onchange="onChangeTalentStyle(value);"
+      placeholder="Talent Style"
+      options='[{"label": "Talent Pyramid", "value": "pyramid"}, {"label": "Specialization Trees", "value": "trees"}]'
+    ></dropdown>
+    <div style="flex-grow: 1">
+      <label
+        textalign="right"
+        variant="bold"
+        size="xs"
+        field="talentLabel"
+      ></label>
+    </div>
+  </div>
 
   <box field="talentPyramid">
-    <label variant="bold" size="md" label="Talents" textalign="center"></label>
     <list
       listtype="character_talents_list"
       emptylisttext="Drag Talents on the Features Tab"
       field="talents"
+      onchange="onChangeTalents()"
     ></list>
   </box>
 
@@ -182,22 +282,4 @@
       variant="striped"
     ></list>
   </box>
-
-  <div style="margin-top: 8px"></div>
-
-  <label
-    variant="bold"
-    size="md"
-    label="Archetype Features"
-    textalign="center"
-  ></label>
-  <list listtype="character_species_details_list" field="species"></list>
-  <label
-    field="speciesDetailsLabel"
-    size="sm"
-    width="100%"
-    variant="unstyled"
-    textalign="center"
-    label="Drag and Drop an Archetype on the Main Tab"
-  ></label>
 </div>
