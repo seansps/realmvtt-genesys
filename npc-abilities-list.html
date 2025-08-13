@@ -6,51 +6,53 @@
   }
 </script>
 
-<div style="height: 30px; display: flex; gap: 4px; align-items: center">
-  <div style="width: 30px; min-width: 30px">
-    <portrait width="30px" height="30px" name="portrait"></portrait>
-  </div>
-  <div style="flex-grow: 1">
-    <namefield
-      size="xs"
-      variant="standard"
-      placeholder="Ability Name..."
-      field="namefield"
-    ></namefield>
-  </div>
-  <stringfield
-    field="range"
-    size="xs"
-    label="Range"
-    width="60px"
-    variant="tooltip-underline"
-    placeholder="Range..."
-    editable="false"
-  ></stringfield>
-  <stringfield
-    field="difficulty"
-    size="xs"
-    width="60px"
-    label="Difficulty"
-    variant="tooltip-underline"
-    placeholder="Difficulty..."
-    editable="false"
-  ></stringfield>
-  <button
-    field="useButton"
-    size="xs"
-    label="Use"
-    color="primary"
-    variant="light"
-    onclick="onUseAbility();"
-  ></button>
-</div>
 <accordion
   field="abilityDetailsAccordion"
   label="Description"
   size="xs"
   variant="light"
 >
+  <accordion.control>
+    <div style="height: 30px; display: flex; gap: 4px; align-items: center">
+      <div style="width: 30px; min-width: 30px">
+        <portrait width="30px" height="30px" name="portrait"></portrait>
+      </div>
+      <div style="flex-grow: 1">
+        <namefield
+          size="xs"
+          variant="standard"
+          placeholder="Ability Name..."
+          field="namefield"
+        ></namefield>
+      </div>
+      <stringfield
+        field="range"
+        size="xs"
+        label="Range"
+        width="60px"
+        variant="tooltip-underline"
+        placeholder="Range..."
+        editable="false"
+      ></stringfield>
+      <stringfield
+        field="difficulty"
+        size="xs"
+        width="60px"
+        label="Difficulty"
+        variant="tooltip-underline"
+        placeholder="Difficulty..."
+        editable="false"
+      ></stringfield>
+      <button
+        field="useButton"
+        size="xs"
+        label="Use"
+        color="primary"
+        variant="light"
+        onclick="onUseAbility();"
+      ></button>
+    </div>
+  </accordion.control>
   <richtextfield
     width="100%"
     field="description"
@@ -58,7 +60,13 @@
     placeholder="Enter Description..."
     disablecontrols="true"
   ></richtextfield>
-</accordion>
-<accordion field="additionalEffectsAcc" label="Additional Effects" size="xs">
-  <list listtype="ability_upgrades_list" field="abilityUpgrades"></list>
+  <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px">
+    <label
+      size="xs"
+      variant="bold"
+      label="Additional Effects"
+      field="abilityUpgradesLabel"
+    ></label>
+    <list listtype="ability_upgrades_list" field="abilityUpgrades"></list>
+  </div>
 </accordion>

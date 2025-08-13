@@ -1,28 +1,32 @@
-<div style="min-height: 30px; display: flex; flex-direction: column; gap: 4px">
-  <div style="display: flex; gap: 4px">
-    <namefield
-      width="100%"
-      size="xs"
-      label="Name"
-      field="namefield"
-      placeholder="Additional Effect Name..."
-    ></namefield>
-    <numberfield
-      field="increaseDifficulty"
-      size="xs"
-      label="Increase Difficulty"
-      placeholder="0"
-      width="200px"
-      showsign="true"
-      minvalue="0"
-      maxvalue="4"
-    ></numberfield>
-  </div>
-  <accordion size="xs" field="descriptionAcc" label="Description">
-    <richtextfield
-      field="description"
-      placeholder="Enter Additional Effect description..."
+<accordion field="descriptionAcc" size="xl">
+  <accordion.control>
+    <div
+      style="min-height: 30px; display: flex; flex-direction: column; gap: 4px"
     >
-    </richtextfield>
-  </accordion>
-</div>
+      <div style="display: flex; gap: 4px">
+        <namefield
+          width="100%"
+          size="xs"
+          label="Name"
+          field="namefield"
+          placeholder="Additional Effect Name..."
+        ></namefield>
+        <numberfield
+          field="increaseDifficulty"
+          size="xs"
+          label="Increase Difficulty"
+          placeholder="0"
+          width="200px"
+          showsign="true"
+          minvalue="0"
+          maxvalue="4"
+        ></numberfield>
+      </div>
+    </div>
+  </accordion.control>
+  <richtextfield
+    field="description"
+    placeholder="Enter Additional Effect description..."
+  >
+  </richtextfield>
+</accordion>

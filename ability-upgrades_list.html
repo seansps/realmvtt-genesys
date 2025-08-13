@@ -1,36 +1,45 @@
-<div style="min-height: 30px; display: flex; flex-direction: column; gap: 4px">
-  <div style="display: flex; gap: 4px; align-items: flex-end">
-    <div style="min-width: 40px">
-      <label variant="bold" size="xs" textalign="left" label="Active?"></label>
-    </div>
-    <checkbox field="active" size="xs" editable="true"></checkbox>
-    <namefield
-      width="100%"
-      size="xs"
-      variant="tooltip-underline"
-      label="Name"
-      field="namefield"
-      placeholder="Additional Effect Name..."
-    ></namefield>
-    <numberfield
-      field="increaseDifficulty"
-      size="xs"
-      variant="tooltip"
-      label="Increase Difficulty"
-      placeholder="0"
-      width="50px"
-      showsign="true"
-      hidecontrols="true"
-      minvalue="0"
-      maxvalue="4"
-    ></numberfield>
-  </div>
-  <accordion size="xs" field="descriptionAcc" label="Description">
-    <richtextfield
-      field="description"
-      disablecontrols="true"
-      placeholder="Enter Additional Effect description..."
+<accordion size="xs" field="descriptionAcc">
+  <accordion.control>
+    <div
+      style="min-height: 30px; display: flex; flex-direction: column; gap: 4px"
     >
-    </richtextfield>
-  </accordion>
-</div>
+      <div style="display: flex; gap: 4px; align-items: flex-end">
+        <div style="min-width: 40px">
+          <label
+            variant="bold"
+            size="xs"
+            textalign="left"
+            label="Active?"
+          ></label>
+        </div>
+        <checkbox field="active" size="xs" editable="true"></checkbox>
+        <namefield
+          width="100%"
+          size="xs"
+          variant="tooltip-underline"
+          label="Name"
+          field="namefield"
+          placeholder="Additional Effect Name..."
+        ></namefield>
+        <numberfield
+          field="increaseDifficulty"
+          size="xs"
+          variant="tooltip"
+          label="Increase Difficulty"
+          placeholder="0"
+          width="50px"
+          showsign="true"
+          hidecontrols="true"
+          minvalue="0"
+          maxvalue="4"
+        ></numberfield>
+      </div>
+    </div>
+  </accordion.control>
+  <richtextfield
+    field="description"
+    disablecontrols="true"
+    placeholder="Enter Additional Effect description..."
+  >
+  </richtextfield>
+</accordion>
