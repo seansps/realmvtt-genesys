@@ -1617,12 +1617,50 @@ function rollCheck(attribute) {
     attribute
   );
 
+  // Count unique "upgrade" modifiers and filter them out
+  const upgradeModifierIds = new Set();
+  const filteredModifiers = modifiers.filter((mod) => {
+    if (mod.value === "upgrade") {
+      upgradeModifierIds.add(mod._id || mod.name);
+      return false;
+    }
+    return true;
+  });
+  const upgradeCount = upgradeModifierIds.size;
+
+  // Calculate dice pool with upgrades (similar to skill roll logic)
+  let abilityDice = characteristicValue;
+  let proficiencyDice = 0;
+
+  if (upgradeCount > 0) {
+    const upgrades = Math.min(upgradeCount, characteristicValue);
+    proficiencyDice = upgrades;
+    abilityDice =
+      Math.max(0, abilityDice - upgrades) +
+      Math.max(0, upgradeCount - characteristicValue);
+  }
+
+  // Build the dice string
+  let diceString = "";
+  if (abilityDice > 0) {
+    diceString += `${abilityDice}ability`;
+  }
+  if (proficiencyDice > 0) {
+    if (diceString) diceString += " + ";
+    diceString += `${proficiencyDice}proficiency`;
+  }
+
+  // Fallback if no dice
+  if (!diceString) {
+    diceString = "";
+  }
+
   const totalEncumbrance = record?.data?.encumbrance || 0;
   const encumbranceThreshold = record?.data?.encumbranceThreshold || 0;
   const encumbrancePenalty = totalEncumbrance - encumbranceThreshold;
   const isBrawnOrAgility = attribute === "brawn" || attribute === "agility";
   if (encumbrancePenalty > 0 && isBrawnOrAgility) {
-    modifiers.push({
+    filteredModifiers.push({
       name: "Encumbrance Penalty",
       value: `${encumbrancePenalty} setback`,
       type: "string",
@@ -1630,11 +1668,11 @@ function rollCheck(attribute) {
     });
   }
 
-  // Star Wars RPG narrative dice system
+  // Genesys narrative dice system
   api.promptRoll(
     `${capitalize(attribute)} Check`,
-    `${characteristicValue}ability`,
-    modifiers,
+    diceString,
+    filteredModifiers,
     metadata,
     "ability"
   );
@@ -1660,20 +1698,59 @@ function rollSkill(
   const skillRank =
     abilityOverride === undefined ? parseInt(skill.data?.rank || "0", 10) : 0;
 
-  // Star Wars RPG skill dice mechanics:
+  // Get modifiers for skills and the ability if provided (moved up to count upgrades first)
+  const modifiers = getEffectsAndModifiersForToken(
+    record,
+    ["skillBonus"],
+    skill.name,
+    undefined,
+    undefined,
+    undefined,
+    ability
+  );
+
+  // Get modifiers for the stat used
+  const abilityModifiers = getEffectsAndModifiersForToken(
+    record,
+    ["abilityBonus"],
+    skill.data?.stat || "brawn"
+  );
+
+  modifiers.push(...abilityModifiers);
+
+  // Add additional modifiers if provided
+  if (additionalModifiers) {
+    modifiers.push(...additionalModifiers);
+  }
+
+  // Count unique "upgrade" modifiers and filter them out
+  const upgradeModifierIds = new Set();
+  const filteredModifiers = modifiers.filter((mod) => {
+    if (mod.value === "upgrade") {
+      upgradeModifierIds.add(mod._id || mod.name);
+      return false;
+    }
+    return true;
+  });
+  const upgradeCount = upgradeModifierIds.size;
+
+  // Genesys skill dice mechanics:
   // Start with Ability dice equal to the characteristic
   // Upgrade dice equal to skill rank from Ability to Proficiency
   // If skill rank > characteristic, add extra Ability dice
+  // Also apply upgrade modifiers as additional effective skill ranks
+
+  const effectiveSkillRank = skillRank + upgradeCount;
 
   let abilityDice = attributeValue;
   let proficiencyDice = 0;
 
-  if (skillRank > 0) {
-    const upgrades = Math.min(skillRank, attributeValue);
+  if (effectiveSkillRank > 0) {
+    const upgrades = Math.min(effectiveSkillRank, attributeValue);
     proficiencyDice = upgrades;
     abilityDice =
       Math.max(0, abilityDice - upgrades) +
-      Math.max(0, skillRank - attributeValue);
+      Math.max(0, effectiveSkillRank - attributeValue);
   }
 
   if (abilityOverride) {
@@ -1764,31 +1841,6 @@ function rollSkill(
     ...additionalMetadata,
   };
 
-  // Get modifiers for skills and the ability if provided
-  const modifiers = getEffectsAndModifiersForToken(
-    record,
-    ["skillBonus"],
-    skill.name,
-    undefined,
-    undefined,
-    undefined,
-    ability
-  );
-
-  // Get modifiers for the stat used
-  const abilityModifiers = getEffectsAndModifiersForToken(
-    record,
-    ["abilityBonus"],
-    skill.data?.stat || "brawn"
-  );
-
-  modifiers.push(...abilityModifiers);
-
-  // Add additional modifiers if provided
-  if (additionalModifiers) {
-    modifiers.push(...additionalModifiers);
-  }
-
   // Get encumbrance penalty
   // A total encumbrance value over the threshold means the hero
   // is "encumbered," and suffers one setback to all Agility and
@@ -1801,7 +1853,7 @@ function rollSkill(
   const isBrawnOrAgility =
     skill.data?.stat === "brawn" || skill.data?.stat === "agility";
   if (encumbrancePenalty > 0 && isBrawnOrAgility) {
-    modifiers.push({
+    filteredModifiers.push({
       name: "Encumbrance Penalty",
       value: `${encumbrancePenalty} setback`,
       type: "string",
@@ -1817,7 +1869,7 @@ function rollSkill(
     const vehicle = api.getValue(vehicleDataPath);
     const handling = vehicle?.data?.handling || 0;
     if (Math.abs(handling) > 0) {
-      modifiers.push({
+      filteredModifiers.push({
         name: "Handling",
         value: `${Math.abs(handling)} ${handling > 0 ? "boost" : "setback"}`,
         active: true,
@@ -1832,8 +1884,8 @@ function rollSkill(
     rollName = `Attack with ${skill.name}`;
   }
 
-  // Star Wars RPG narrative dice system
-  api.promptRoll(rollName, diceString, modifiers, metadata, metadata.rollType);
+  // Genesys narrative dice system
+  api.promptRoll(rollName, diceString, filteredModifiers, metadata, metadata.rollType);
 }
 
 function rollInitiative(record) {
