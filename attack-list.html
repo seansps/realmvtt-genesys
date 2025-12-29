@@ -1,7 +1,7 @@
 <script>
   function onLoad() {
     // If needed, hide or unhide the ammo field
-    const dataPathToWeapon = getNearestParentDataPath(dataPath);
+    const dataPathToWeapon = dataPath.replace(".name", "");
     const weapon = api.getValue(dataPathToWeapon);
 
     let pathToFields = "fields";
@@ -117,6 +117,7 @@
       <div style="min-width: 70px; flex: 1">
         <namefield
           field="namefield"
+          onload="onLoad();"
           variant="standard"
           placeholder="Item Name..."
         ></namefield>
@@ -134,7 +135,6 @@
         <label size="xs" variant="bold" label="Ammo: "></label>
         <div style="width: 60px">
           <numberfield
-            onload="onLoad();"
             width="100%"
             field="ammo"
             placeholder="0"
