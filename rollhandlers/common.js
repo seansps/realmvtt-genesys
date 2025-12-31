@@ -2833,9 +2833,9 @@ function getHealingMacro(healing, deduct = false) {
       healingToApply -= usedStims;
       oldValues["data.healingUsed"] = usedStims;
       valuesToSet["data.healingUsed"] = usedStims + 1;
-      deductMessage = \` (Deducted \${usedStims} healing items used today.)\`;
+      deductMessage = \` (Deducted \${usedStims} due to healing items used today.)\`;
     }
-    message += \`Healed \${healingToApply} wounds\${deductMessage}.\\n\`;
+    message += \`Healed \${healingToApply} wounds\${deductMessage}\\n\`;
     if (healingToApply > 0) {
       // Get healingBonus and penalties for target
       const healingBonus = getEffectsAndModifiersForToken(target, ["healingBonus"]);
