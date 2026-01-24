@@ -1546,8 +1546,13 @@ function recalculateThresholds(record, moreValuesToSet = undefined) {
   }
 
   // Calculate remaining wounds and strain
-  const currentWounds = parseInt(record?.data?.wounds || "0", 10);
-  const currentStrain = parseInt(record?.data?.strain || "0", 10);
+  // Use wounds/strain from valuesToSet if already set, otherwise use current record values
+  const currentWounds = valuesToSet["data.wounds"] !== undefined
+    ? valuesToSet["data.wounds"]
+    : parseInt(record?.data?.wounds || "0", 10);
+  const currentStrain = valuesToSet["data.strain"] !== undefined
+    ? valuesToSet["data.strain"]
+    : parseInt(record?.data?.strain || "0", 10);
 
   // Only calculate woundsRemaining if it hasn't been set in valuesToSet
   if (valuesToSet["data.woundsRemaining"] === undefined) {
@@ -2989,7 +2994,7 @@ function getDamageMacro({
       oldValues["data.wounds"] = wounds;
       oldValues["data.woundsRemaining"] = woundsRemaining;
       valuesToSet["data.wounds"] = wounds + damageValue;
-      valuesToSet["data.woundsRemaining"] = Math.max(0, woundsRemaining - valuesToSet["data.wounds"]);
+      valuesToSet["data.woundsRemaining"] = Math.max(0, woundThreshold - valuesToSet["data.wounds"]);
       
       // If this is a minion, recalculate thresholds to update skill ranks
       if (isMinion) {
@@ -3040,11 +3045,11 @@ function getDamageMacro({
     else if (damageValue > 0 && damageType === "stun") {
       const strainThreshold = parseInt(target.data?.strainThreshold || "0", 10);
       const strainRemaining = parseInt(target.data?.strainRemaining !== undefined ? target.data?.strainRemaining : strainThreshold, 10);
-      const strain = parseInt(target.data?.strain || "0", 10);  
+      const strain = parseInt(target.data?.strain || "0", 10);
       oldValues["data.strain"] = strain;
       oldValues["data.strainRemaining"] = strainRemaining;
       valuesToSet["data.strain"] = strain + damageValue;
-      valuesToSet["data.strainRemaining"] = Math.max(0, strainRemaining - valuesToSet["data.strain"]);
+      valuesToSet["data.strainRemaining"] = Math.max(0, strainThreshold - valuesToSet["data.strain"]);
       api.setValuesOnRecord(target, valuesToSet);
       api.floatText(target, '+' + damageValue + ' Strain', "#0000FF");
       // Check if we need to add unconscious effect
