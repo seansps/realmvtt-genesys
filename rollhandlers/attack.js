@@ -175,7 +175,7 @@ if (weapon) {
     }
 
     let critType = "notset";
-    if (target?.token?.data?.type === "vehicle") {
+    if (target?.token?.data?.type === "vehicle" || target?.token?.recordType === "vehicles") {
       critType = "hit";
     } else if (
       target?.token?.recordType === "characters" ||
@@ -332,7 +332,9 @@ if (weapon) {
     message += `\n\n**[center][color=blue]Sunder can be Triggered[/color][/center]**`;
   }
 
-  message += `\n\n${damageMacro}`;
+  if (results.successes > 0) {
+    message += `\n\n${damageMacro}`;
+  }
   if (critMacro) {
     message += `\n\n${critMacro}`;
   }

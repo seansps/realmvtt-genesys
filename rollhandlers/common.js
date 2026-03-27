@@ -128,12 +128,12 @@ function checkForReplacements(value, replacements = {}, recordOverride = null) {
   let thisRecord = recordOverride || record;
   // Case for Brawn|Agility|Intellect|Cunning|Willpower|Presence
   const matchModifier = value.match(
-    /[Bb]rawn|[Aa]gility|[Ii]ntellect|[Cc]unning|[Ww]illpower|[Pp]resence/
+    /[Bb]rawn|[Aa]gility|[Ii]ntellect|[Cc]unning|[Ww]illpower|[Pp]resence/,
   );
   if (matchModifier) {
     const attributeMod = parseInt(
       thisRecord?.data?.[matchModifier[0]] || "0",
-      10
+      10,
     );
     value = value.replaceAll(matchModifier[0], attributeMod);
   }
@@ -278,7 +278,7 @@ function getEffectsAndModifiersForToken(
   appliedById = undefined,
   // If Weapon is provided, we also look on it and attachments on it
   weapon = undefined,
-  ability = undefined
+  ability = undefined,
 ) {
   if (!target) {
     return [];
@@ -364,7 +364,7 @@ function getEffectsAndModifiersForToken(
         stackModifiers[`${effect?._id}-${JSON.stringify(rule)}`] = true;
         // The value is the number of times they have this effect
         let value = target?.effectIds?.filter(
-          (id) => id === effect?._id
+          (id) => id === effect?._id,
         ).length;
         if (isPenalty && value > 0) {
           value = -value;
@@ -438,7 +438,7 @@ function getEffectsAndModifiersForToken(
       (attachment) =>
         attachment.data?.active === true ||
         attachment.data?.active === undefined ||
-        attachment.data?.active === null
+        attachment.data?.active === null,
     )
     .map((attachment) => ({
       ...attachment,
@@ -465,7 +465,7 @@ function getEffectsAndModifiersForToken(
 
   // Filter items that are not equipped
   const equippedItems = items.filter(
-    (item) => item.data?.carried === "equipped"
+    (item) => item.data?.carried === "equipped",
   );
 
   // Get attachments from equipped armor items
@@ -477,12 +477,12 @@ function getEffectsAndModifiersForToken(
           (attachment) =>
             attachment.data?.active === true ||
             attachment.data?.active === undefined ||
-            attachment.data?.active === null
+            attachment.data?.active === null,
         )
         .map((attachment) => ({
           ...attachment,
           itemId: armorItem?._id,
-        }))
+        })),
     );
 
   [
@@ -553,13 +553,13 @@ function getEffectsAndModifiersForToken(
 
   if (field && field !== "") {
     results = results.filter(
-      (r) => r.field === field || r.field === "all" || !r.field
+      (r) => r.field === field || r.field === "all" || !r.field,
     );
   }
 
   // Filter by itemId if provided
   results = results.filter(
-    (r) => r.itemId === itemId || r.itemId === undefined
+    (r) => r.itemId === itemId || r.itemId === undefined,
   );
 
   // Filter by appliedById if provided
@@ -593,7 +593,7 @@ function updateAttribute({
     }
 
     // Update Soak Value: brawn + armor soak, unless it's a vehicle
-    if (record.data?.type !== "vehicle") {
+    if (record.data?.type !== "vehicle" && record.recordType !== "vehicles") {
       const armorSoak = 0;
       const soakValue = parseInt(value || "0", 10) + armorSoak;
       valuesToSet["data.soakValue"] = soakValue;
@@ -604,7 +604,7 @@ function updateAttribute({
     const woundThreshold = parseInt(record?.data?.woundThreshold || "0", 10);
     valuesToSet["data.woundsRemaining"] = Math.max(
       0,
-      woundThreshold - currentWounds
+      woundThreshold - currentWounds,
     );
 
     // Characters have an "encumbrance threshold" of 5 plus
@@ -628,7 +628,7 @@ function updateAttribute({
     const strainThreshold = parseInt(record?.data?.strainThreshold || "0", 10);
     valuesToSet["data.strainRemaining"] = Math.max(
       0,
-      strainThreshold - currentStrain
+      strainThreshold - currentStrain,
     );
   }
 
@@ -637,7 +637,7 @@ function updateAttribute({
     const woundThreshold = parseInt(value || "0", 10);
     const woundsRemaining = Math.max(
       0,
-      woundThreshold - parseInt(record?.data?.wounds || "0", 10)
+      woundThreshold - parseInt(record?.data?.wounds || "0", 10),
     );
     valuesToSet["data.woundsRemaining"] = woundsRemaining;
   }
@@ -647,7 +647,7 @@ function updateAttribute({
     const woundThreshold = parseInt(record?.data?.woundThreshold || "0", 10);
     const woundsRemaining = Math.max(
       0,
-      woundThreshold - parseInt(value || "0", 10)
+      woundThreshold - parseInt(value || "0", 10),
     );
     valuesToSet["data.woundsRemaining"] = woundsRemaining;
   }
@@ -657,7 +657,7 @@ function updateAttribute({
     const strainThreshold = parseInt(value || "0", 10);
     const strainRemaining = Math.max(
       0,
-      strainThreshold - parseInt(record?.data?.strain || "0", 10)
+      strainThreshold - parseInt(record?.data?.strain || "0", 10),
     );
     valuesToSet["data.strainRemaining"] = strainRemaining;
   }
@@ -667,7 +667,7 @@ function updateAttribute({
     const strainThreshold = parseInt(record?.data?.strainThreshold || "0", 10);
     const strainRemaining = Math.max(
       0,
-      strainThreshold - parseInt(value || "0", 10)
+      strainThreshold - parseInt(value || "0", 10),
     );
     valuesToSet["data.strainRemaining"] = strainRemaining;
   }
@@ -1255,7 +1255,7 @@ function initializeSkills(record) {
       {
         "data.skills": skillObjects,
       },
-      addUnarmedIfNeeded
+      addUnarmedIfNeeded,
     );
   };
 
@@ -1284,7 +1284,7 @@ function initializeSkills(record) {
         } else {
           addSkills();
         }
-      }
+      },
     );
   }
 }
@@ -1323,7 +1323,7 @@ function getArmorDefense(armor) {
 function getBestArmor(record) {
   const inventory = record?.data?.inventory || [];
   const equippedArmor = inventory.filter(
-    (item) => item.data?.carried === "equipped" && item.data?.type === "armor"
+    (item) => item.data?.carried === "equipped" && item.data?.type === "armor",
   );
 
   // Get any items with the defense related qualities equipped
@@ -1335,7 +1335,7 @@ function getBestArmor(record) {
       item.data?.carried === "equipped" &&
       (item.data?.type === "melee weapon" ||
         item.data?.type === "ranged weapon" ||
-        item.data?.type === "armor")
+        item.data?.type === "armor"),
   );
   itemsEquipped.forEach((item) => {
     const qualities = item.data?.special || [];
@@ -1442,21 +1442,21 @@ function recalculateThresholds(record, moreValuesToSet = undefined) {
   // Calculate total bonus values from current effects
   const totalWoundBonus = woundThresholdBonuses.reduce(
     (sum, bonus) => sum + bonus.value,
-    0
+    0,
   );
   const totalStrainBonus = strainThresholdBonuses.reduce(
     (sum, bonus) => sum + bonus.value,
-    0
+    0,
   );
 
   // Get previously stored bonus values
   const previousWoundBonus = parseInt(
     record?.data?.woundThresholdBonus || "0",
-    10
+    10,
   );
   const previousStrainBonus = parseInt(
     record?.data?.strainThresholdBonus || "0",
-    10
+    10,
   );
 
   // Calculate the difference in bonuses
@@ -1492,7 +1492,7 @@ function recalculateThresholds(record, moreValuesToSet = undefined) {
   const rangedDefenseBonus = bestArmor.rangedDefenseBonus;
 
   // Update soak and defense values for non-vehicles
-  if (record.data?.type !== "vehicle") {
+  if (record.data?.type !== "vehicle" && record.recordType !== "vehicles") {
     valuesToSet["data.soakValue"] = brawn + bestArmor.soakBonus;
     soakBonuses.forEach((bonus) => {
       // Only if not from an effect
@@ -1547,28 +1547,26 @@ function recalculateThresholds(record, moreValuesToSet = undefined) {
 
   // Calculate remaining wounds and strain
   // Use wounds/strain from valuesToSet if already set, otherwise use current record values
-  const currentWounds = valuesToSet["data.wounds"] !== undefined
-    ? valuesToSet["data.wounds"]
-    : parseInt(record?.data?.wounds || "0", 10);
-  const currentStrain = valuesToSet["data.strain"] !== undefined
-    ? valuesToSet["data.strain"]
-    : parseInt(record?.data?.strain || "0", 10);
+  const currentWounds =
+    valuesToSet["data.wounds"] !== undefined
+      ? valuesToSet["data.wounds"]
+      : parseInt(record?.data?.wounds || "0", 10);
+  const currentStrain =
+    valuesToSet["data.strain"] !== undefined
+      ? valuesToSet["data.strain"]
+      : parseInt(record?.data?.strain || "0", 10);
 
-  // Only calculate woundsRemaining if it hasn't been set in valuesToSet
-  if (valuesToSet["data.woundsRemaining"] === undefined) {
-    valuesToSet["data.woundsRemaining"] = Math.max(
-      0,
-      valuesToSet["data.woundThreshold"] - currentWounds
-    );
-  }
+  // Always recalculate remaining values based on the final threshold
+  // (previous guards skipped this when updateAttribute already set a stale value)
+  valuesToSet["data.woundsRemaining"] = Math.max(
+    0,
+    valuesToSet["data.woundThreshold"] - currentWounds,
+  );
 
-  // Only calculate strainRemaining if it hasn't been set in valuesToSet
-  if (valuesToSet["data.strainRemaining"] === undefined) {
-    valuesToSet["data.strainRemaining"] = Math.max(
-      0,
-      valuesToSet["data.strainThreshold"] - currentStrain
-    );
-  }
+  valuesToSet["data.strainRemaining"] = Math.max(
+    0,
+    valuesToSet["data.strainThreshold"] - currentStrain,
+  );
 
   const isNPC = record?.recordType !== "characters";
   const isMinion =
@@ -1583,23 +1581,23 @@ function recalculateThresholds(record, moreValuesToSet = undefined) {
         // number of remaining minions - 1
         const woundsPerMinion = parseInt(
           record?.data?.woundsPerMinion || "0",
-          10
+          10,
         );
         const totalWounds = parseInt(
           valuesToSet["data.wounds"] !== undefined
             ? valuesToSet["data.wounds"]
             : record?.data?.wounds || "0",
-          10
+          10,
         );
         const woundThreshold = parseInt(
           valuesToSet["data.woundThreshold"] !== undefined
             ? valuesToSet["data.woundThreshold"]
             : record?.data?.woundThreshold || "0",
-          10
+          10,
         );
         const minionsDefeated = Math.max(
           0,
-          Math.floor((totalWounds - 1) / woundsPerMinion)
+          Math.floor((totalWounds - 1) / woundsPerMinion),
         );
         const totalMinions = Math.ceil(woundThreshold / woundsPerMinion);
         const minionsRemaining = Math.max(0, totalMinions - minionsDefeated);
@@ -1639,7 +1637,7 @@ function rollCheck(attribute) {
   const modifiers = getEffectsAndModifiersForToken(
     record,
     ["abilityBonus"],
-    attribute
+    attribute,
   );
 
   // Count unique "upgrade" modifiers and filter them out
@@ -1658,7 +1656,7 @@ function rollCheck(attribute) {
       const count = parseInt(upgradeMatch[1], 10);
       upgradeModifierIds.set(
         modId,
-        (upgradeModifierIds.get(modId) || 0) + count
+        (upgradeModifierIds.get(modId) || 0) + count,
       );
       return false;
     }
@@ -1666,7 +1664,7 @@ function rollCheck(attribute) {
   });
   const upgradeCount = Array.from(upgradeModifierIds.values()).reduce(
     (sum, val) => sum + val,
-    0
+    0,
   );
 
   // Calculate dice pool with upgrades (similar to skill roll logic)
@@ -1715,7 +1713,7 @@ function rollCheck(attribute) {
     diceString,
     filteredModifiers,
     metadata,
-    "ability"
+    "ability",
   );
 }
 
@@ -1724,11 +1722,11 @@ function rollSkill(
   skill,
   additionalMetadata = {},
   ability = undefined,
-  additionalModifiers = []
+  additionalModifiers = [],
 ) {
   const attributeValue = parseInt(
     record?.data?.[skill.data?.stat || "brawn"] || "0",
-    10
+    10,
   );
 
   let abilityOverride = undefined;
@@ -1747,14 +1745,14 @@ function rollSkill(
     undefined,
     undefined,
     undefined,
-    ability
+    ability,
   );
 
   // Get modifiers for the stat used
   const abilityModifiers = getEffectsAndModifiersForToken(
     record,
     ["abilityBonus"],
-    skill.data?.stat || "brawn"
+    skill.data?.stat || "brawn",
   );
 
   modifiers.push(...abilityModifiers);
@@ -1780,7 +1778,7 @@ function rollSkill(
       const count = parseInt(upgradeMatch[1], 10);
       upgradeModifierIds.set(
         modId,
-        (upgradeModifierIds.get(modId) || 0) + count
+        (upgradeModifierIds.get(modId) || 0) + count,
       );
       return false;
     }
@@ -1788,7 +1786,7 @@ function rollSkill(
   });
   const upgradeCount = Array.from(upgradeModifierIds.values()).reduce(
     (sum, val) => sum + val,
-    0
+    0,
   );
 
   // Genesys skill dice mechanics:
@@ -1947,7 +1945,7 @@ function rollSkill(
     diceString,
     filteredModifiers,
     metadata,
-    metadata.rollType
+    metadata.rollType,
   );
 }
 
@@ -1962,7 +1960,7 @@ function rollInitiative(record) {
     api.showNotification(
       `No skill found for ${initiativeSkill}. Add the Skill to their sheet and try again.`,
       "red",
-      "Skill Not Found"
+      "Skill Not Found",
     );
     return;
   }
@@ -1970,7 +1968,7 @@ function rollInitiative(record) {
   const modifiers = getEffectsAndModifiersForToken(
     record,
     ["initiativeBonus"],
-    skill.name
+    skill.name,
   );
 
   rollSkill(
@@ -1983,7 +1981,7 @@ function rollInitiative(record) {
       characteristic: initiativeSkill,
     },
     undefined,
-    modifiers
+    modifiers,
   );
 }
 
@@ -2016,7 +2014,7 @@ function useAbility(record, ability, dataPathToAbility) {
       const effectName = effect.name;
       difficultyNumber += effect.data?.increaseDifficulty || 0;
       const effectDescription = api.richTextToMarkdown(
-        effect.data?.description || ""
+        effect.data?.description || "",
       );
       additionalEffectsText += `#### ${effectName}\n${effectDescription}\n`;
     }
@@ -2099,7 +2097,7 @@ function useAbility(record, ability, dataPathToAbility) {
             upgrade.data?.rank && upgrade.data?.rank > 1
               ? ` (${upgrade.data?.rank})`
               : ""
-          }`
+          }`,
       )
       .join("\n");
 
@@ -2137,13 +2135,14 @@ function useAbility(record, ability, dataPathToAbility) {
   if (skillRoll) {
     const skills = record?.data?.skills || [];
     const skill = skills.find((skill) => skill.name === skillRoll);
-    const isVehicle = record?.data?.type === "vehicle";
+    const isVehicle =
+      record?.data?.type === "vehicle" || record?.recordType === "vehicles";
 
     if (isVehicle) {
       api.showNotification(
         `This action requires a Skill Check. Set the vehicle as the active vehicle for a Character or NPC and roll from their sheet.`,
         "red",
-        "Skill Not Found"
+        "Skill Not Found",
       );
       return;
     }
@@ -2152,7 +2151,7 @@ function useAbility(record, ability, dataPathToAbility) {
       api.showNotification(
         `No skill found for ${skillRoll}. Add the Skill to their sheet and try again.`,
         "red",
-        "Skill Not Found"
+        "Skill Not Found",
       );
       return;
     }
@@ -2167,7 +2166,7 @@ function useAbility(record, ability, dataPathToAbility) {
         dataPathToAbility,
         "attack",
         "personal",
-        difficulty
+        difficulty,
       );
     } else {
       rollSkill(
@@ -2176,7 +2175,7 @@ function useAbility(record, ability, dataPathToAbility) {
         {
           difficulty: difficulty,
         },
-        ability
+        ability,
       );
 
       // Check for animation
@@ -2228,7 +2227,7 @@ function getResultFromTable(table, total) {
 
   // Find the row where the total falls between minValue and maxValue (inclusive)
   const matchingRow = sortedRows.find(
-    (row) => total >= row.minValue && total <= row.maxValue
+    (row) => total >= row.minValue && total <= row.maxValue,
   );
 
   return matchingRow || null;
@@ -2240,7 +2239,8 @@ function addConditionToRecord(record, recordLink) {
     ...recordLink.value,
   };
 
-  const recordType = record.recordType;
+  // Vehicles use "npcs" as the API lookup type
+  const recordType = record.recordType === "vehicles" ? "npcs" : record.recordType;
   const recordId =
     record.recordType === "characters" && record.recordId
       ? record.recordId
@@ -2253,7 +2253,7 @@ function addConditionToRecord(record, recordLink) {
     updateAttributes(
       // Merge updates with the original record
       updatedRecord,
-      valuesToSet
+      valuesToSet,
     );
 
     if (Object.keys(valuesToSet).length > 0) {
@@ -2263,7 +2263,7 @@ function addConditionToRecord(record, recordLink) {
     api.showNotification(
       `Added ${conditionObj.name} to ${record.name}`,
       "green",
-      "Critical Hit Added"
+      "Critical Hit Added",
     );
 
     const effects = conditionObj.data?.effects || [];
@@ -2288,7 +2288,7 @@ function addConditionToRecord(record, recordLink) {
           () => {
             // Process next effect (only after current addition is complete)
             processEffectsSequentially(effects, index + 1);
-          }
+          },
         );
       });
     }
@@ -2303,14 +2303,16 @@ function addConditionToRecord(record, recordLink) {
     record,
     "data.criticalInjuries",
     [conditionObj],
-    addEffects
+    addEffects,
   );
 }
 
 function onConditionChange(record, deletedItem) {
   if (!deletedItem) return;
   // Requery the record to get the latest record
-  api.getRecord(record.recordType, record._id, (actualRecord) => {
+  // Vehicles use "npcs" as the API lookup type
+  const lookupType = record.recordType === "vehicles" ? "npcs" : record.recordType;
+  api.getRecord(lookupType, record._id, (actualRecord) => {
     const deletedEffects = deletedItem.data?.effects || [];
     const recordId = record._id;
 
@@ -2330,7 +2332,7 @@ function onConditionChange(record, deletedItem) {
       if (index >= effects.length) return;
 
       // Re-query the record to get the latest data
-      api.getRecord(record.recordType, recordId, (recordUpdated) => {
+      api.getRecord(lookupType, recordId, (recordUpdated) => {
         // Process current effect
         const effect = effects[index];
         const effectObj = JSON.parse(effect);
@@ -2352,14 +2354,22 @@ function onConditionChange(record, deletedItem) {
 
 function addCondition(tokenOrRecord, recordLink) {
   // First requery to get the actual record
-  const recordType = tokenOrRecord.recordType;
+  let recordType = tokenOrRecord.recordType;
+  // Vehicles use "npcs" as the API lookup type
+  if (recordType === "vehicles") {
+    recordType = "npcs";
+  }
   const recordId =
     tokenOrRecord.recordType === "characters" && tokenOrRecord.recordId
       ? tokenOrRecord.recordId
       : tokenOrRecord._id;
 
-  // This will get the Character record or the Token record (if NPC)
+  // This will get the Character record or the Token record (if NPC/Vehicle)
   api.getRecord(recordType, recordId, (actualRecord) => {
+    if (!actualRecord) {
+      api.showNotification("Could not find the target record.", "red", "Error");
+      return;
+    }
     addConditionToRecord(actualRecord, recordLink);
   });
 }
@@ -2411,7 +2421,7 @@ function rollCriticalInjury(record, critType, additionalModifiers = []) {
       isNarrative: false,
       critType: `${critType ? critType : "notset"}`,
     },
-    "criticalInjury"
+    "criticalInjury",
   );
 }
 
@@ -2439,7 +2449,7 @@ function rollAttack(
   dataPathToWeapon,
   attackType = "attack",
   scale = "personal",
-  difficultyOverride = undefined
+  difficultyOverride = undefined,
 ) {
   const isMelee = weapon.data?.type === "melee weapon";
   let skill = weapon.data?.weaponSkill || weapon.data?.skillCheck || "";
@@ -2454,7 +2464,7 @@ function rollAttack(
     isMelee ? "melee" : "ranged",
     weaponId,
     undefined,
-    weapon
+    weapon,
   );
 
   // Find the skill in the character's skills
@@ -2463,7 +2473,7 @@ function rollAttack(
     api.showNotification(
       `No skill found for ${skill}. Add the Skill to their sheet and try again.`,
       "red",
-      "Skill Not Found"
+      "Skill Not Found",
     );
     return;
   }
@@ -2484,7 +2494,11 @@ function rollAttack(
 
     // Check if we're making a planetary attack and the record is not a vehicle
     // which is likely the case because vehicle attacks are made from non-vehicle NPCs and Characters
-    if (scale === "planetary" && record.data?.type !== "vehicle") {
+    if (
+      scale === "planetary" &&
+      record.data?.type !== "vehicle" &&
+      record.recordType !== "vehicles"
+    ) {
       // If we're making a planetary attack, we use the vehicle's silhouette
       const vehicleDataPath = getNearestParentDataPath(dataPathToWeapon);
       const vehicle = api.getValue(vehicleDataPath);
@@ -2517,7 +2531,7 @@ function rollAttack(
         api.showNotification(
           "Gunnery is impossible to use when Engaged with a target.",
           "red",
-          "Impossible Roll"
+          "Impossible Roll",
         );
         return;
       }
@@ -2548,7 +2562,7 @@ function rollAttack(
       record.data?.brawn < (weapon.data?.cumbersome || 0)
     ) {
       difficultyIncrease += Math.abs(
-        (weapon.data?.cumbersome || 0) - (record.data?.brawn || 0)
+        (weapon.data?.cumbersome || 0) - (record.data?.brawn || 0),
       );
     }
 
@@ -2557,7 +2571,7 @@ function rollAttack(
       getEffectsAndModifiersForToken(
         token,
         ["difficultyOfAttacksTargetingYou"],
-        isMelee ? "melee" : "ranged"
+        isMelee ? "melee" : "ranged",
       );
     difficultyOfAttacksTargetingYouModifiers.forEach((mod) => {
       const modValue = parseInt(mod.value, 10);
@@ -2576,7 +2590,7 @@ function rollAttack(
       getEffectsAndModifiersForToken(
         token,
         ["upgradeDifficultyOfAttacksTargetingYou"],
-        isMelee ? "melee" : "ranged"
+        isMelee ? "melee" : "ranged",
       );
     let upgradeDifficulty = 0;
     upgradeDifficultyOfAttacksTargetingYouModifiers.forEach((mod) => {
@@ -2620,7 +2634,7 @@ function rollAttack(
       : token?.data?.defenseRanged || 0;
 
     // If target is a vehicle, use `defense` instead of `defenseRanged`
-    if (token.data?.type === "vehicle") {
+    if (token.data?.type === "vehicle" || token.recordType === "vehicles") {
       targetDefense = token?.data?.defense || 0;
     }
 
@@ -2638,12 +2652,12 @@ function rollAttack(
     const targetDefenseBonuses = getEffectsAndModifiersForToken(
       token,
       ["defenseBonus"],
-      targetDefenseField
+      targetDefenseField,
     );
     const targetDefensePenalties = getEffectsAndModifiersForToken(
       token,
       ["defensePenalty"],
-      targetDefenseField
+      targetDefenseField,
     );
 
     // Add effect-based defense bonuses as setback reduction (negative setback)
@@ -2672,7 +2686,7 @@ function rollAttack(
     const attacksTargetingYouModifiers = getEffectsAndModifiersForToken(
       token,
       ["attacksTargetingYou"],
-      isMelee ? "melee" : "ranged"
+      isMelee ? "melee" : "ranged",
     );
     attacksTargetingYouModifiers.forEach((mod) => {
       modifiers.push(mod);
@@ -2748,7 +2762,7 @@ function rollAttack(
         brawn: record.data?.brawn || 0,
       },
       undefined,
-      modifiers
+      modifiers,
     );
   });
 
@@ -2773,7 +2787,7 @@ function getDamageModifiersForAttack({ record, weapon }) {
     isMelee ? "melee" : "ranged",
     weapon._id,
     undefined,
-    weapon
+    weapon,
   );
   damageModifiers.forEach((mod) => {
     if (mod.active === true) {
@@ -2791,7 +2805,7 @@ function getDamageModifiersForAttack({ record, weapon }) {
       weaponSkill.toLowerCase(),
       weapon._id,
       undefined,
-      weapon
+      weapon,
     );
     weaponSkillModifiers.forEach((mod) => {
       if (
@@ -2938,10 +2952,10 @@ function getDamageMacro({
 
     // If the scale is personal, and the target is a vehicle,
     // we multiply the soakValue by 10 (because armor is technically 10x soak)
-    if (scale === "personal" && target.data?.type === "vehicle") {
+    if (scale === "personal" && (target.data?.type === "vehicle" || target.recordType === "vehicles")) {
       soakValue = soakValue * 10;
     }
-    else if (scale === "planetary" && target.data?.type !== "vehicle") {
+    else if (scale === "planetary" && target.data?.type !== "vehicle" && target.recordType !== "vehicles") {
       // If the scale is planetary, and the target is not a vehicle,
       // we multiply the damage by 10 (because vehicles do 10x damage)
       damageToApply = damageToApply * 10;
@@ -2952,7 +2966,7 @@ function getDamageMacro({
     let breachValue = ${breach};
     // Pierce ignores 1 soak for each point unless reinforced
     let pierceValue = ${pierce};
-    if (target.data?.type !== "vehicle") {
+    if (target.data?.type !== "vehicle" && target.recordType !== "vehicles") {
       // In personal scale, breach ignores 10x 
       breachValue = 10 * breachValue;
     }
@@ -2978,7 +2992,7 @@ function getDamageMacro({
       damageMessage = "strain as wounds";
     }
     let soakMessage = soakValue > 0 ? \` (\${soakValue} absorbed by Soak.)\` : '.';
-    if (target.data?.type === "vehicle") {
+    if (target.data?.type === "vehicle" || target.recordType === "vehicles") {
       soakMessage = soakValue > 0 ? \` (\${soakValue} absorbed by Armor.)\` : '.';
     }
     let message = \`Took \${damageValue} \${damageMessage}\${soakMessage}\\n\`;
@@ -3036,8 +3050,8 @@ function getDamageMacro({
         message += minionRemainingMessage;
       }
       else {
-        // Check if we need to add unconscious effect
-        if (wounds + damageValue > woundThreshold) {
+        // Check if we need to add unconscious effect (not for vehicles)
+        if (wounds + damageValue > woundThreshold && target.data?.type !== "vehicle" && target.recordType !== "vehicles") {
           addUnconsciousEffect = true;
         }
       }
@@ -3052,8 +3066,8 @@ function getDamageMacro({
       valuesToSet["data.strainRemaining"] = Math.max(0, strainThreshold - valuesToSet["data.strain"]);
       api.setValuesOnRecord(target, valuesToSet);
       api.floatText(target, '+' + damageValue + ' Strain', "#0000FF");
-      // Check if we need to add unconscious effect
-      if (strain + damageValue > strainThreshold) {
+      // Check if we need to add unconscious effect (not for vehicles)
+      if (strain + damageValue > strainThreshold && target.data?.type !== "vehicle" && target.recordType !== "vehicles") {
         addUnconsciousEffect = true;
       }
     }
@@ -3159,7 +3173,7 @@ function useItem(record, itemDataPath) {
 
   const skillCheck = api.getValueOnRecord(
     record,
-    `${itemDataPath}.data.skillCheck`
+    `${itemDataPath}.data.skillCheck`,
   );
 
   const healing = api.getValueOnRecord(record, `${itemDataPath}.data.healing`);
@@ -3193,7 +3207,7 @@ function useItem(record, itemDataPath) {
     : 0;
   // If this is being used by a vehicle, use the planetary damage macro
   let scale = "personal";
-  if (record.data?.type === "vehicle") {
+  if (record.data?.type === "vehicle" || record.recordType === "vehicles") {
     scale = "planetary";
   }
   const damageMacro =
