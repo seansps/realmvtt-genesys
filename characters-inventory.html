@@ -213,11 +213,16 @@
   }
 </script>
 
-<div>
-  <label variant="bold" textalign="center" label="Inventory"></label>
-</div>
+<div
+  class="sheet--datapad"
+  style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px"
+>
+  <div class="rvtt-datapad-section">
+    <div class="rvtt-datapad-divider">
+      <span class="rvtt-datapad-divider__label">Inventory</span>
+    </div>
 
-<div style="display: flex; flex-direction: row; gap: 4px">
+<div style="display: flex; flex-direction: row; gap: 4px; align-items: flex-end">
   <dropdown
     field="filterList"
     label="Filter by Type"
@@ -266,7 +271,10 @@
         <div
           style="display: flex; flex-direction: column; gap: 4px; width: 150px"
         >
-          <label size="xs" variant="bold" label="Add Money"></label>
+          <label
+            class="rvtt-datapad-label rvtt-datapad-label--accent"
+            label="Add Money"
+          ></label>
           <numberfield
             placeholder="0"
             field="addCash"
@@ -296,7 +304,10 @@
         <div
           style="display: flex; flex-direction: column; gap: 4px; width: 150px"
         >
-          <label size="xs" variant="bold" label="Deduct Money"></label>
+          <label
+            class="rvtt-datapad-label rvtt-datapad-label--accent"
+            label="Deduct Money"
+          ></label>
           <numberfield
             placeholder="0"
             field="deductCash"
@@ -315,68 +326,76 @@
   </div>
 </div>
 
-<div style="display: flex; flex-direction: row; margin-top: 8px">
-  <div style="margin-left: 34px">
-    <label variant="bold" size="xs" textalign="left" label="Count"></label>
-  </div>
-  <div style="margin-left: 30px; flex-grow: 1">
-    <label variant="bold" size="xs" textalign="left" label="Item"></label>
-  </div>
-  <div
-    style="
-      margin-left: 4px;
-      max-width: 100px;
-      min-width: 68px;
-      flex: 1;
-      display: flex;
-    "
-  >
-    <label variant="bold" size="xs" textalign="left" label="Location"></label>
-  </div>
-  <div
-    style="
-      margin-left: 4px;
-      max-width: 95px;
-      min-width: 65px;
-      flex: 1;
-      display: flex;
-    "
-  >
-    <label variant="bold" size="xs" textalign="left" label="Equipped"></label>
-  </div>
-  <box field="spacerRight" hideonlocked="true">
-    <div style="width: 16px"></div>
-  </box>
-</div>
+    <div style="display: flex; flex-direction: row; margin-top: 8px">
+      <div style="margin-left: 34px">
+        <label class="rvtt-datapad-label" label="Count"></label>
+      </div>
+      <div style="margin-left: 30px; flex-grow: 1">
+        <label class="rvtt-datapad-label" label="Item"></label>
+      </div>
+      <div
+        style="
+          margin-left: 4px;
+          max-width: 100px;
+          min-width: 68px;
+          flex: 1;
+          display: flex;
+        "
+      >
+        <label class="rvtt-datapad-label" label="Location"></label>
+      </div>
+      <div
+        style="
+          margin-left: 4px;
+          max-width: 95px;
+          min-width: 65px;
+          flex: 1;
+          display: flex;
+        "
+      >
+        <label class="rvtt-datapad-label" label="Equipped"></label>
+      </div>
+      <box field="spacerRight" hideonlocked="true">
+        <div style="width: 16px"></div>
+      </box>
+    </div>
 
-<div style="display: flex; flex-direction: column; flex-grow: 1">
-  <list
-    listtype="inventory_list"
-    radius="none"
-    variant="striped"
-    field="inventory"
-    onchange="onItemDeleted();"
-  >
-  </list>
-</div>
+    <div style="display: flex; flex-direction: column; flex-grow: 1">
+      <list
+        listtype="inventory_list"
+        radius="none"
+        variant="striped"
+        field="inventory"
+        onchange="onItemDeleted();"
+      >
+      </list>
+    </div>
+  </div>
 
-<div style="display: flex; flex-direction: row; width: 100%; gap: 4px">
-  <numberfield
-    size="xs"
-    placeholder="0"
-    field="encumbrance"
-    label="Total Encumbrance"
-  ></numberfield>
-  <numberfield
-    size="xs"
-    placeholder="0"
-    field="encumbranceThreshold"
-    label="Encumbrance Threshold"
-  ></numberfield>
-  <numberfield
-    size="xs"
-    placeholder="0"
-    field="healingUsed"
-    label="Healing Items Used Today"
-  ></numberfield>
+  <!-- ===== ENCUMBRANCE ===== -->
+  <div class="rvtt-datapad-section">
+    <div class="rvtt-datapad-divider">
+      <span class="rvtt-datapad-divider__label">Encumbrance</span>
+    </div>
+    <div style="display: flex; flex-direction: row; width: 100%; gap: 4px">
+      <numberfield
+        size="xs"
+        placeholder="0"
+        field="encumbrance"
+        label="Total Encumbrance"
+      ></numberfield>
+      <numberfield
+        size="xs"
+        placeholder="0"
+        field="encumbranceThreshold"
+        label="Encumbrance Threshold"
+      ></numberfield>
+      <numberfield
+        size="xs"
+        placeholder="0"
+        field="healingUsed"
+        label="Healing Items Used Today"
+      ></numberfield>
+    </div>
+  </div>
 </div>

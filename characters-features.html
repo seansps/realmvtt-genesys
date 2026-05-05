@@ -195,91 +195,100 @@
   }
 </script>
 
-<div style="display: flex; flex-direction: column; gap: 4px">
-  <label
-    variant="bold"
-    size="md"
-    label="Archetype Features"
-    textalign="center"
-  ></label>
-  <list listtype="character_species_details_list" field="species"></list>
-  <label
-    field="speciesDetailsLabel"
-    size="sm"
-    width="100%"
-    variant="unstyled"
-    textalign="center"
-    label="Drag and Drop an Archetype on the Main Tab"
-  ></label>
-
-  <label variant="bold" size="md" label="Talents" textalign="center"></label>
-
-  <div
-    style="
-      display: flex;
-      gap: 4px;
-      width: 100%;
-      margin-bottom: 8px;
-      align-items: flex-end;
-    "
-  >
-    <dropdown
-      field="talentSetting"
-      hideonlocked="true"
-      label="Talent Style"
-      defaultvalue="pyramid"
-      onload="onLoad();"
-      onchange="onChangeTalentStyle(value);"
-      placeholder="Talent Style"
-      options='[{"label": "Talent Pyramid", "value": "pyramid"}, {"label": "Specialization Trees", "value": "trees"}]'
-    ></dropdown>
-    <div style="flex-grow: 1">
+<div
+  class="sheet--datapad"
+  style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px"
+>
+  <!-- ===== ARCHETYPE FEATURES ===== -->
+  <div class="rvtt-datapad-section">
+    <div class="rvtt-datapad-divider">
+      <span class="rvtt-datapad-divider__label">Archetype Features</span>
+    </div>
+    <list listtype="character_species_details_list" field="species"></list>
+    <div style="display: flex; justify-content: center">
       <label
-        textalign="right"
-        variant="bold"
-        size="xs"
-        field="talentLabel"
+        class="rvtt-datapad-label"
+        field="speciesDetailsLabel"
+        label="Drag and Drop an Archetype on the Main Tab"
       ></label>
     </div>
   </div>
 
-  <box field="talentPyramid">
-    <list
-      listtype="character_talents_list"
-      emptylisttext="Drag Talents on the Features Tab"
-      field="talents"
-      onchange="onChangeTalents()"
-    ></list>
-  </box>
+  <!-- ===== TALENTS ===== -->
+  <div class="rvtt-datapad-section">
+    <div class="rvtt-datapad-divider">
+      <span class="rvtt-datapad-divider__label">Talents</span>
+    </div>
 
-  <box field="specTrees" hidden="true">
-    <label
-      variant="bold"
-      size="md"
-      label="Specializations"
-      textalign="center"
-    ></label>
+    <div
+      style="
+        display: flex;
+        gap: 4px;
+        width: 100%;
+        margin-bottom: 8px;
+        align-items: flex-end;
+      "
+    >
+      <dropdown
+        field="talentSetting"
+        hideonlocked="true"
+        label="Talent Style"
+        defaultvalue="pyramid"
+        onload="onLoad();"
+        onchange="onChangeTalentStyle(value);"
+        placeholder="Talent Style"
+        options='[{"label": "Talent Pyramid", "value": "pyramid"}, {"label": "Specialization Trees", "value": "trees"}]'
+      ></dropdown>
+      <div style="flex-grow: 1">
+        <label
+          class="rvtt-datapad-label rvtt-datapad-label--accent"
+          textalign="right"
+          field="talentLabel"
+        ></label>
+      </div>
+    </div>
 
-    <label
-      size="sm"
-      label="Click a Specialization's Icon to View the Tree and Add Talents"
-      textalign="center"
-    ></label>
+    <box field="talentPyramid">
+      <list
+        listtype="character_talents_list"
+        emptylisttext="Drag Talents on the Features Tab"
+        field="talents"
+        onchange="onChangeTalents()"
+      ></list>
+    </box>
 
-    <list
-      listtype="character_specialization_list"
-      field="specializations"
-      variant="striped"
-    ></list>
+    <box field="specTrees" hidden="true">
+      <div style="display: flex; justify-content: center; margin-top: 4px">
+        <label
+          class="rvtt-datapad-label rvtt-datapad-label--accent"
+          label="Specializations"
+        ></label>
+      </div>
+      <div style="display: flex; justify-content: center">
+        <label
+          class="rvtt-datapad-label"
+          label="Click a Specialization's Icon to View the Tree and Add Talents"
+        ></label>
+      </div>
 
-    <div style="margin-top: 8px"></div>
+      <list
+        listtype="character_specialization_list"
+        field="specializations"
+        variant="striped"
+      ></list>
 
-    <label variant="bold" size="md" label="Talents" textalign="center"></label>
+      <div style="display: flex; justify-content: center; margin-top: 8px">
+        <label
+          class="rvtt-datapad-label rvtt-datapad-label--accent"
+          label="Talents"
+        ></label>
+      </div>
 
-    <list
-      listtype="character_talents_list"
-      field="talents"
-      variant="striped"
-    ></list>
-  </box>
+      <list
+        listtype="character_talents_list"
+        field="talents"
+        variant="striped"
+      ></list>
+    </box>
+  </div>
 </div>

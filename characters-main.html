@@ -156,7 +156,7 @@
     api.setValues(valuesToSet);
 
     api.sendMessage(
-      `Resting for day. Recovered 1 wound (${currentWounds} → ${newWounds}) and all strain.`
+      `Resting for day. Recovered 1 wound (${currentWounds} → ${newWounds}) and all strain.`,
     );
   }
 
@@ -165,412 +165,330 @@
   }
 </script>
 
-<div style="display: flex; margin-top: 4px; flex-direction: column; gap: 8px">
-  <!-- First Flex Row: Portrait | (Species | Career) -->
-  <div
-    style="
-      display: flex;
-      flex-direction: row;
-      gap: 8px;
-      align-items: flex-start;
-    "
-  >
-    <div style="display: flex; flex-direction: column">
+<!-- Datapad-themed Genesys character sheet (cyan accent — neutral
+     sci-fi). Field bindings, list types, and on* handlers preserved. -->
+<div
+  class="sheet--datapad"
+  style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px"
+>
+  <!-- ===== HEADER ===== -->
+  <div class="rvtt-datapad-section">
+    <div style="display: flex; align-items: center; gap: 14px">
+      <portrait variant="fancy" width="120px" height="120px"></portrait>
       <div
         style="
-          width: 138px;
-          min-width: 138px;
-          max-width: 138px;
-          min-height: 138px;
-          max-height: 138px;
-        "
-      >
-        <portrait width="138px" height="138px"></portrait>
-      </div>
-    </div>
-
-    <div style="display: flex; flex-direction: column; gap: 4px; width: 100%">
-      <div
-        style="
+          flex: 1;
+          min-width: 0;
           display: flex;
-          flex-direction: row;
+          flex-direction: column;
           gap: 4px;
-          align-items: flex-end;
         "
       >
-        <stringfield
-          width="100%"
-          size="md"
-          field="speciesName"
-          placeholder="Drag and drop an Archetype"
-          label="Archetype"
-        ></stringfield>
-        <list
-          width="fit-content"
-          height="42px"
-          hidden="true"
-          listtype="character_species_list"
-          field="species"
-          onchange="onDeleteSpecies();"
-        ></list>
-      </div>
-
-      <div
-        style="
-          display: flex;
-          flex-direction: row;
-          gap: 4px;
-          align-items: flex-end;
-        "
-      >
-        <stringfield
-          width="100%"
-          size="md"
-          field="careerName"
-          placeholder="Drag and drop a Career"
-          label="Career"
-        ></stringfield>
-        <list
-          width="fit-content"
-          height="42px"
-          hidden="true"
-          listtype="character_career_list"
-          field="careers"
-          onchange="onDeleteCareer();"
-        ></list>
+        <label field="namefield" class="rvtt-datapad-display-name"></label>
+        <div style="display: flex; gap: 4px; align-items: flex-end">
+          <stringfield
+            width="100%"
+            size="xs"
+            field="speciesName"
+            placeholder="Drag an Archetype&#8230;"
+            label="Archetype"
+          ></stringfield>
+          <list
+            width="fit-content"
+            height="42px"
+            hidden="true"
+            listtype="character_species_list"
+            field="species"
+            onchange="onDeleteSpecies()"
+          ></list>
+          <stringfield
+            width="100%"
+            size="xs"
+            field="careerName"
+            placeholder="Drag a Career&#8230;"
+            label="Career"
+          ></stringfield>
+          <list
+            width="fit-content"
+            height="42px"
+            hidden="true"
+            listtype="character_career_list"
+            field="careers"
+            onchange="onDeleteCareer()"
+          ></list>
+        </div>
+        <div
+          style="display: flex; gap: 12px; align-items: center; margin-top: 2px"
+        >
+          <span class="rvtt-datapad-mono-dim">XP</span>
+          <numberfield
+            field="spentXp"
+            size="xs"
+            hidecontrols="true"
+            width="56px"
+            placeholder="0"
+          ></numberfield>
+          <span class="rvtt-datapad-mono-dim">/</span>
+          <numberfield
+            field="xp"
+            size="xs"
+            hidecontrols="true"
+            width="56px"
+            placeholder="0"
+          ></numberfield>
+          <span class="rvtt-datapad-mono-dim" style="margin-left: auto"
+            >REST</span
+          >
+          <iconbutton
+            field="Rest"
+            size="md"
+            variant="subtle"
+            options='[{"icon": "IconBed", "label": "Rest", "value": "rest"}]'
+            onchange=""
+            onclick="rest()"
+          ></iconbutton>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Second Flex Row: Stats (Brawn, Agility, Intellect, Cunning, Willpower, Presence) -->
-  <div
-    style="
-      display: flex;
-      flex-direction: row;
-      gap: 8px;
-      width: 100%;
-      align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
-    "
-  >
+  <!-- ===== ATTRIBUTES ===== -->
+  <div class="rvtt-datapad-section">
+    <div class="rvtt-datapad-divider">
+      <span class="rvtt-datapad-divider__label">Attributes</span>
+    </div>
     <div
       style="
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 2px;
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 8px;
       "
     >
-      <numberfield
-        placeholder="0"
-        size="sm"
-        width="80px"
-        textalign="center"
+      <attribute
         field="brawn"
         label="Brawn"
-        onchange="updateAttribute({ record, attribute: 'brawn', value })"
-        onclick="rollCheck('brawn');"
-        onload="onLoadCharacter();"
-      ></numberfield>
-      <button
-        field="Brawn Check"
-        size="xs"
-        width="80px"
-        variant="outline"
-        label="Roll"
-        onclick="rollCheck('brawn');"
-      ></button>
-    </div>
-
-    <div
-      style="
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 2px;
-      "
-    >
-      <numberfield
+        size="md"
+        width="100%"
         placeholder="0"
-        size="sm"
-        width="80px"
+        containervariant="fancy"
+        textalign="center"
+        bold="true"
+        showbutton
+        buttontext="Roll"
+        buttonsize="xxs"
+        buttonvariant="outline"
+        buttonposition="bottom"
+        onclick="rollCheck('brawn')"
+        onchange="updateAttribute({ record, attribute: 'brawn', value })"
+        onload="onLoadCharacter()"
+      ></attribute>
+      <attribute
         field="agility"
         label="Agility"
+        size="md"
+        width="100%"
+        placeholder="0"
+        containervariant="fancy"
         textalign="center"
+        bold="true"
+        showbutton
+        buttontext="Roll"
+        buttonsize="xxs"
+        buttonvariant="outline"
+        buttonposition="bottom"
+        onclick="rollCheck('agility')"
         onchange="updateAttribute({ record, attribute: 'agility', value })"
-        onclick="rollCheck('agility');"
-      ></numberfield>
-      <button
-        field="Agility Check"
-        size="xs"
-        width="80px"
-        variant="outline"
-        label="Roll"
-        onclick="rollCheck('agility');"
-      ></button>
-    </div>
-
-    <div
-      style="
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 2px;
-      "
-    >
-      <numberfield
-        placeholder="0"
-        size="sm"
-        width="80px"
+      ></attribute>
+      <attribute
         field="intellect"
-        textalign="center"
         label="Intellect"
-        onchange="updateAttribute({ record, attribute: 'intellect', value })"
-        onclick="rollCheck('intellect');"
-      ></numberfield>
-      <button
-        field="Intellect Check"
-        size="xs"
-        width="80px"
-        variant="outline"
-        label="Roll"
-        onclick="rollCheck('intellect');"
-      ></button>
-    </div>
-
-    <div
-      style="
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 2px;
-      "
-    >
-      <numberfield
+        size="md"
+        width="100%"
         placeholder="0"
-        size="sm"
-        width="80px"
+        containervariant="fancy"
         textalign="center"
+        bold="true"
+        showbutton
+        buttontext="Roll"
+        buttonsize="xxs"
+        buttonvariant="outline"
+        buttonposition="bottom"
+        onclick="rollCheck('intellect')"
+        onchange="updateAttribute({ record, attribute: 'intellect', value })"
+      ></attribute>
+      <attribute
         field="cunning"
         label="Cunning"
-        onchange="updateAttribute({ record, attribute: 'cunning', value })"
-        onclick="rollCheck('cunning');"
-      ></numberfield>
-      <button
-        field="Cunning Check"
-        size="xs"
-        width="80px"
-        variant="outline"
-        label="Roll"
-        onclick="rollCheck('cunning');"
-      ></button>
-    </div>
-
-    <div
-      style="
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 2px;
-      "
-    >
-      <numberfield
+        size="md"
+        width="100%"
         placeholder="0"
-        size="sm"
-        width="80px"
+        containervariant="fancy"
         textalign="center"
+        bold="true"
+        showbutton
+        buttontext="Roll"
+        buttonsize="xxs"
+        buttonvariant="outline"
+        buttonposition="bottom"
+        onclick="rollCheck('cunning')"
+        onchange="updateAttribute({ record, attribute: 'cunning', value })"
+      ></attribute>
+      <attribute
         field="willpower"
         label="Willpower"
+        size="md"
+        width="100%"
+        placeholder="0"
+        containervariant="fancy"
+        textalign="center"
+        bold="true"
+        showbutton
+        buttontext="Roll"
+        buttonsize="xxs"
+        buttonvariant="outline"
+        buttonposition="bottom"
+        onclick="rollCheck('willpower')"
         onchange="updateAttribute({ record, attribute: 'willpower', value })"
-        onclick="rollCheck('willpower');"
-      ></numberfield>
-      <button
-        field="Willpower Check"
-        size="xs"
-        width="80px"
-        variant="outline"
-        label="Roll"
-        onclick="rollCheck('willpower');"
-      ></button>
+      ></attribute>
+      <attribute
+        field="presence"
+        label="Presence"
+        size="md"
+        width="100%"
+        placeholder="0"
+        containervariant="fancy"
+        textalign="center"
+        bold="true"
+        showbutton
+        buttontext="Roll"
+        buttonsize="xxs"
+        buttonvariant="outline"
+        buttonposition="bottom"
+        onclick="rollCheck('presence')"
+        onchange="updateAttribute({ record, attribute: 'presence', value })"
+      ></attribute>
     </div>
+  </div>
 
+  <!-- ===== VITALS ===== -->
+  <div class="rvtt-datapad-section">
+    <div class="rvtt-datapad-divider">
+      <span class="rvtt-datapad-divider__label">Vitals</span>
+    </div>
     <div
       style="
         display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 2px;
+        flex-direction: row;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-end;
       "
     >
       <numberfield
         placeholder="0"
         size="sm"
         width="80px"
-        textalign="center"
-        field="presence"
-        label="Presence"
-        onchange="updateAttribute({ record, attribute: 'presence', value })"
-        onclick="rollCheck('presence');"
+        field="soakValue"
+        label="Soak"
       ></numberfield>
-      <button
-        field="Presence Check"
-        size="xs"
-        width="80px"
-        variant="outline"
-        label="Roll"
-        onclick="rollCheck('presence');"
-      ></button>
+      <numberfield
+        placeholder="0"
+        size="sm"
+        width="120px"
+        icon="IconHeartFilled"
+        field="woundThreshold"
+        label="Wound Threshold"
+        color="pink"
+        onchange="
+          updateAttribute({ record, attribute: 'woundThreshold', value })
+        "
+      ></numberfield>
+      <numberfield
+        placeholder="0"
+        size="sm"
+        width="90px"
+        icon="IconBandageFilled"
+        field="wounds"
+        label="Wounds"
+        color="red"
+        minvalue="0"
+        onchange="updateAttribute({ record, attribute: 'wounds', value })"
+      ></numberfield>
+      <numberfield
+        placeholder="0"
+        size="sm"
+        width="120px"
+        icon="IconHeartbeat"
+        field="strainThreshold"
+        label="Strain Threshold"
+        color="blue"
+        onchange="
+          updateAttribute({ record, attribute: 'strainThreshold', value })
+        "
+      ></numberfield>
+      <numberfield
+        placeholder="0"
+        size="sm"
+        width="90px"
+        icon="IconActivity"
+        field="strain"
+        label="Strain"
+        color="cyan"
+        minvalue="0"
+        onchange="updateAttribute({ record, attribute: 'strain', value })"
+      ></numberfield>
+    </div>
+    <div
+      style="
+        display: flex;
+        flex-direction: row;
+        gap: 6px;
+        justify-content: center;
+        margin-top: 8px;
+      "
+    >
+      <numberfield
+        placeholder="0"
+        size="sm"
+        width="120px"
+        field="defenseMelee"
+        icon="IconShield"
+        label="Defense (Melee)"
+        color="violet"
+      ></numberfield>
+      <numberfield
+        placeholder="0"
+        size="sm"
+        width="120px"
+        field="defenseRanged"
+        icon="IconShield"
+        label="Defense (Ranged)"
+        color="violet"
+      ></numberfield>
     </div>
   </div>
 
-  <!-- Third Flex Row: Health Stats -->
-  <div
-    style="
-      display: flex;
-      flex-direction: row;
-      gap: 6px;
-      width: 100%;
-      justify-content: center;
-      flex-wrap: wrap;
-    "
-  >
-    <numberfield
-      placeholder="0"
-      size="sm"
-      width="90px"
-      field="soakValue"
-      label="Soak Value"
-    ></numberfield>
-
-    <numberfield
-      placeholder="0"
-      size="sm"
-      width="120px"
-      icon="IconHeartFilled"
-      field="woundThreshold"
-      label="Wound Threshold"
-      color="pink"
-      onchange="updateAttribute({ record, attribute: 'woundThreshold', value })"
-    ></numberfield>
-
-    <numberfield
-      placeholder="0"
-      size="sm"
-      width="90px"
-      icon="IconBandageFilled"
-      field="wounds"
-      label="Wounds"
-      color="red"
-      minvalue="0"
-      onchange="updateAttribute({ record, attribute: 'wounds', value })"
-    ></numberfield>
-
-    <numberfield
-      placeholder="0"
-      size="sm"
-      width="120px"
-      icon="IconHeartbeat"
-      field="strainThreshold"
-      label="Strain Threshold"
-      color="blue"
-      onchange="updateAttribute({ record, attribute: 'strainThreshold', value })"
-    ></numberfield>
-
-    <numberfield
-      placeholder="0"
-      size="sm"
-      width="90px"
-      icon="IconActivity"
-      field="strain"
-      label="Strain"
-      color="cyan"
-      minvalue="0"
-      onchange="updateAttribute({ record, attribute: 'strain', value })"
-    ></numberfield>
+  <!-- ===== CRITICAL INJURIES ===== -->
+  <div class="rvtt-datapad-section">
+    <div class="rvtt-datapad-divider">
+      <span class="rvtt-datapad-divider__label">Critical Injuries</span>
+    </div>
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 4px">
+      <button
+        field="rollCriticalInjuryBtn"
+        size="xs"
+        variant="outline"
+        color="primary"
+        label="Roll for Critical Injury"
+        onclick="onRollCriticalInjury()"
+      ></button>
+    </div>
+    <list
+      listtype="conditions_list"
+      field="criticalInjuries"
+      variant="striped"
+      onchange="onChangeConditions()"
+    ></list>
   </div>
-
-  <div
-    style="
-      display: flex;
-      flex-direction: row;
-      gap: 6px;
-      width: 100%;
-      justify-content: center;
-      align-items: flex-end;
-    "
-  >
-    <numberfield
-      placeholder="0"
-      size="sm"
-      width="120px"
-      field="defenseMelee"
-      icon="IconShield"
-      label="Defense (Melee)"
-      color="violet"
-    ></numberfield>
-
-    <numberfield
-      placeholder="0"
-      size="sm"
-      width="120px"
-      field="defenseRanged"
-      icon="IconShield"
-      label="Defense (Ranged)"
-      color="violet"
-    ></numberfield>
-
-    <numberfield
-      placeholder="0"
-      size="sm"
-      width="115px"
-      field="spentXp"
-      label="Spent XP"
-    ></numberfield>
-
-    <numberfield
-      placeholder="0"
-      size="sm"
-      width="115px"
-      field="xp"
-      label="Total XP"
-    ></numberfield>
-
-    <iconbutton
-      field="Rest"
-      size="lg"
-      variant="default"
-      options='[{"icon": "IconBed", "label": "Rest", "value": "rest"}]'
-      onchange=""
-      onclick="rest();"
-    ></iconbutton>
-  </div>
-
-  <!-- Critical Injuries List -->
-  <divider label="Critical Injuries"></divider>
-  <div
-    style="
-      display: flex;
-      flex-direction: row;
-      gap: 8px;
-      width: 100%;
-      align-items: flex-end;
-      justify-content: right;
-    "
-  >
-    <button
-      field="rollCriticalInjuryBtn"
-      size="xs"
-      variant="outline"
-      color="primary"
-      label="Roll for Critical Injury"
-      onclick="onRollCriticalInjury();"
-    ></button>
-  </div>
-  <list
-    listtype="conditions_list"
-    field="criticalInjuries"
-    variant="striped"
-    onchange="onChangeConditions();"
-  ></list>
 </div>
