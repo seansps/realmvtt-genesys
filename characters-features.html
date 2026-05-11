@@ -18,7 +18,28 @@
 
   function onDropSpecialization(type, recordLink) {
     const specializationName = recordLink.tooltip;
-    const specializationObj = { ...recordLink.value, icon: "IconStars" };
+    // Pre-set visibility + initialized + characterId so the canvas tree mounts
+    // correctly the first time the user opens this spec — otherwise the
+    // spec-main onLoad has to do a setValues round-trip to flip
+    // canvasTreeBox.hidden, and the canvas mounts a frame too late to catch
+    // its initial size measurement. characterId is stashed so canvas event
+    // handlers (where `record` resolves to the spec entry, not the character)
+    // can fetch the character via api.getRecord to write talent toggles back.
+    const specializationObj = {
+      ...recordLink.value,
+      icon: "IconStars",
+      fields: {
+        ...(recordLink.value?.fields || {}),
+        canvasTreeBox: { hidden: false },
+        editorTreeBox: { hidden: true },
+        signatureAbility: { hidden: false },
+      },
+      data: {
+        ...(recordLink.value?.data || {}),
+        initalized: true,
+        characterId: record._id,
+      },
+    };
 
     api.addValue("data.specializations", specializationObj, () => {
       const valuesToSet = {};
