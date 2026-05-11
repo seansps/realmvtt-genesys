@@ -32,26 +32,22 @@
         valuesToSet[`${prefix}fields.signatureAbility.hidden`] = false;
       }
     } else if (recordType === "specializations") {
-      // Authoring view: editor grid, no canvas
+      // Authoring/compendium view. editorTreeBox + canvasTreeBoxLocked use
+      // hideonlocked attributes so lock state picks which one renders:
+      //   unlocked → editor grid; locked → rendered canvas tree.
       valuesToSet[`${prefix}fields.editorTreeBox.hidden`] = false;
       valuesToSet[`${prefix}fields.canvasTreeBox.hidden`] = true;
+      valuesToSet[`${prefix}fields.canvasTreeBoxLocked.hidden`] = false;
       showHideDividers();
     }
 
     if (Object.keys(valuesToSet).length > 0) {
       api.setValues(valuesToSet, () => {
-        // Triggering paint from the always-visible careers dropdown's onLoad
-        // (which is what calls onLoad here) avoids the dead-onload problem we
-        // get when paint sits on the hidden canvas/box itself.
-        if (recordType === "characters") paintTalentTree();
+        // paint is a no-op when no canvas is mounted (unlocked compendium).
+        paintTalentTree();
       });
     }
-    // Always paint on character re-renders, even when no values changed
-    // (parent resize, tab switch, etc. — covers cases where canvas.onresize
-    // doesn't refire after autosize's initial measurement settles).
-    if (recordType === "characters") {
-      paintTalentTree();
-    }
+    paintTalentTree();
   }
 
   // ---------- Canvas talent tree (player view) ----------
@@ -61,8 +57,19 @@
     return { spec: api.getValue(path) || record, specPath: path };
   }
 
+  // Two canvases share this code: `talentTreeCanvas` lives in the character
+  // view (canvasTreeBox), `talentTreeCanvasLocked` lives in the locked-spec
+  // compendium view (canvasTreeBoxLocked). Visibility is mutually exclusive
+  // by construction, so probe both and use whichever is mounted.
+  function getActiveCanvas() {
+    return (
+      api.getCanvas("talentTreeCanvas") ||
+      api.getCanvas("talentTreeCanvasLocked")
+    );
+  }
+
   function ttLayout() {
-    const c = api.getCanvas("talentTreeCanvas");
+    const c = getActiveCanvas();
     if (!c) return null;
     const W = c.width;
     const H = c.height;
@@ -646,7 +653,7 @@
   }
 
   function paintTalentTree(explicitCharRec) {
-    const c = api.getCanvas("talentTreeCanvas");
+    const c = getActiveCanvas();
     if (!c) return;
     const lay = ttLayout();
     if (!lay || lay.tileW <= 0 || lay.tileH <= 0) return;
@@ -673,6 +680,9 @@
           }
         });
         return;
+      } else if (record?.recordType === "specializations") {
+        // Locked compendium view of a spec — no character context exists.
+        // Paint the bare tree (no chosen state); charRec stays undefined.
       } else {
         // No character context available (legacy spec without stamped
         // characterId hit via a canvas event handler). Bail rather than
@@ -781,6 +791,9 @@
   //     first-N is a heuristic. Subsequent toggles use the per-slot state.)
   // Skips entirely once data.legacyChosenMigrated is set so it runs once.
   function migrateLegacyChosenSlots(spec, specPath, charRec) {
+    // Compendium spec view has no character — nothing to migrate, and we
+    // must not stamp legacyChosenMigrated onto the master template.
+    if (!charRec) return;
     if (spec?.data?.legacyChosenMigrated) return;
     const prefix = specPath ? specPath + "." : "";
 
@@ -869,6 +882,10 @@
   }
 
   function onCanvasClick() {
+    // Only the character-sheet canvas is interactive — compendium-locked
+    // spec view is read-only/visual.
+    if (record?.recordType !== "characters") return;
+
     const lay = ttLayout();
     if (!lay) return;
     const hit = ttHitTest(event.x, event.y, lay);
@@ -881,14 +898,7 @@
     if (!talent) return;
 
     if (hit.region === "checkbox") {
-      const charId = spec.data?.characterId;
-      if (!charId) {
-        console.warn(
-          "[TT] no characterId on spec — paint hasn't backfilled yet",
-        );
-        return;
-      }
-      api.getRecord("characters", charId, (charRec) => {
+      api.getRecord("characters", record._id, (charRec) => {
         if (!charRec) return;
         // Per-slot chosen state — read off the slot itself, not data.talents.
         // Critical for ranked talents: the same talent can fill multiple
@@ -896,10 +906,6 @@
         const isChosen = ttIsSlotChosen(spec, hit.row, hit.col);
         ttToggleChosen(hit.row, hit.col, isChosen ? "no" : "yes", charRec);
       });
-    } else if (hit.region === "tile") {
-      if (talent._id && talent.recordType) {
-        api.openRecord(talent.recordType, talent._id);
-      }
     }
   }
 
@@ -1223,8 +1229,10 @@
     </div>
   </div>
 
-  <!-- Editor view: full grid with connector toggles. Shown on specialization records. -->
-  <box field="editorTreeBox" hidden="true">
+  <!-- Editor view: full grid with connector toggles. Shown on specialization
+       records when unlocked. hideonlocked hides this on locked compendium
+       views so the rendered canvas (canvasTreeBoxLocked) takes over. -->
+  <box field="editorTreeBox" hidden="true" hideonlocked="true">
     <div style="display: flex; flex-direction: column; gap: 4px">
       <label
         variant="bold"
@@ -2535,12 +2543,36 @@
   </box>
 
   <!-- Player view: rendered talent tree canvas. Shown on character records.
-       onload lives on the <box> because the canvas inside starts unmounted
-       (parent hidden) — the box's onload fires when it becomes visible. -->
+       The canvas inside starts unmounted (parent hidden) — its `autosize`
+       fires onresize on first measure, which triggers the initial paint. -->
   <box field="canvasTreeBox" hidden="true">
     <div style="width: 100%; height: 480px">
       <canvas
         field="talentTreeCanvas"
+        autosize="true"
+        style="
+          width: 100%;
+          height: 100%;
+          display: block;
+          cursor: pointer;
+          border-radius: 4px;
+        "
+        onresize="paintTalentTree()"
+        onmousemove="onCanvasMove()"
+        onmouseleave="onCanvasLeave()"
+        onclick="onCanvasClick()"
+      ></canvas>
+    </div>
+  </box>
+
+  <!-- Compendium-locked view: rendered talent tree canvas, no chosen state.
+       hideonlocked="false" hides this on unlocked spec records so the
+       editor grid takes over. Separate canvas (talentTreeCanvasLocked) so
+       it can coexist with the character-view canvas without fighting it. -->
+  <box field="canvasTreeBoxLocked" hidden="true" hideonlocked="false">
+    <div style="width: 100%; height: 480px">
+      <canvas
+        field="talentTreeCanvasLocked"
         autosize="true"
         style="
           width: 100%;
