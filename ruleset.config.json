@@ -565,10 +565,7 @@
       "showAddButton": false,
       "showDeleteButton": true,
       "addButtonText": "",
-      "allowedListTypes": [
-        "vehicles",
-        "npcs"
-      ],
+      "allowedListTypes": ["vehicles", "npcs"],
       "newItemName": "",
       "newItemUnidentifiedName": "",
       "stackDuplicates": false,
@@ -598,9 +595,7 @@
       "showAddButton": true,
       "showDeleteButton": true,
       "addButtonText": "Add Attachment",
-      "allowedListTypes": [
-        "items"
-      ],
+      "allowedListTypes": ["items"],
       "newItemName": "New Attachment",
       "newItemUnidentifiedName": "Unidentified Item",
       "stackDuplicates": false,
@@ -629,9 +624,7 @@
       "showAddButton": false,
       "showDeleteButton": true,
       "addButtonText": "",
-      "allowedListTypes": [
-        "items"
-      ],
+      "allowedListTypes": ["items"],
       "newItemName": "",
       "newItemUnidentifiedName": "",
       "stackDuplicates": false,
@@ -749,9 +742,7 @@
       "showAddButton": true,
       "showDeleteButton": true,
       "addButtonText": "Add Ability",
-      "allowedListTypes": [
-        "abilities"
-      ],
+      "allowedListTypes": ["abilities"],
       "newItemName": "New Ability",
       "newItemUnidentifiedName": "Ability",
       "stackDuplicates": false,
@@ -1131,9 +1122,7 @@
       "showAddButton": true,
       "showDeleteButton": true,
       "addButtonText": "Add Critical Injury",
-      "allowedListTypes": [
-        "conditions"
-      ],
+      "allowedListTypes": ["conditions"],
       "newItemName": "New Critical Injury",
       "newItemUnidentifiedName": "Critical Injury",
       "stackDuplicates": false,
@@ -1200,9 +1189,7 @@
       "showAddButton": true,
       "showDeleteButton": true,
       "addButtonText": "Add Item",
-      "allowedListTypes": [
-        "items"
-      ],
+      "allowedListTypes": ["items"],
       "newItemName": "New Item",
       "newItemUnidentifiedName": "Unidentified Item",
       "stackDuplicates": true,
@@ -1258,9 +1245,7 @@
       "showAddButton": true,
       "showDeleteButton": true,
       "addButtonText": "Add Item",
-      "allowedListTypes": [
-        "items"
-      ],
+      "allowedListTypes": ["items"],
       "newItemName": "New Item",
       "newItemUnidentifiedName": "Unidentified Item",
       "stackDuplicates": true,
@@ -1328,9 +1313,7 @@
       "showAddButton": true,
       "showDeleteButton": true,
       "addButtonText": "New Ability",
-      "allowedListTypes": [
-        "abilities"
-      ],
+      "allowedListTypes": ["abilities"],
       "newItemName": "New Ability",
       "newItemUnidentifiedName": "Ability",
       "stackDuplicates": false,
@@ -1364,9 +1347,7 @@
       "showAddButton": true,
       "showDeleteButton": true,
       "addButtonText": "Add Item",
-      "allowedListTypes": [
-        "items"
-      ],
+      "allowedListTypes": ["items"],
       "newItemName": "New Item",
       "newItemUnidentifiedName": "Unidentified Item",
       "stackDuplicates": true,
@@ -1404,9 +1385,7 @@
       "showAddButton": true,
       "showDeleteButton": true,
       "addButtonText": "Add Talent",
-      "allowedListTypes": [
-        "talents"
-      ],
+      "allowedListTypes": ["talents"],
       "newItemName": "New Talent",
       "newItemUnidentifiedName": "Talent",
       "stackDuplicates": false,
@@ -1474,9 +1453,7 @@
       "showAddButton": true,
       "showDeleteButton": true,
       "addButtonText": "Add Skill",
-      "allowedListTypes": [
-        "skills"
-      ],
+      "allowedListTypes": ["skills"],
       "newItemName": "New Skill",
       "newItemUnidentifiedName": "New Skill",
       "stackDuplicates": false,
@@ -1514,9 +1491,7 @@
       "showAddButton": true,
       "showDeleteButton": true,
       "addButtonText": "Add Upgrade",
-      "allowedListTypes": [
-        "talents"
-      ],
+      "allowedListTypes": ["talents"],
       "newItemName": "New Upgrade",
       "newItemUnidentifiedName": "Upgrade",
       "stackDuplicates": false,
@@ -1546,9 +1521,7 @@
       "showAddButton": true,
       "showDeleteButton": true,
       "addButtonText": "Add Skill",
-      "allowedListTypes": [
-        "skills"
-      ],
+      "allowedListTypes": ["skills"],
       "newItemName": "New Skill",
       "newItemUnidentifiedName": "Skill",
       "stackDuplicates": false,
@@ -1600,9 +1573,7 @@
       "showAddButton": false,
       "showDeleteButton": true,
       "addButtonText": "",
-      "allowedListTypes": [
-        "signature_abilities"
-      ],
+      "allowedListTypes": ["signature_abilities"],
       "newItemName": "",
       "newItemUnidentifiedName": "",
       "stackDuplicates": false,
@@ -1632,9 +1603,7 @@
       "showAddButton": true,
       "showDeleteButton": true,
       "addButtonText": "Add Talent",
-      "allowedListTypes": [
-        "talents"
-      ],
+      "allowedListTypes": ["talents"],
       "newItemName": "New Talent",
       "newItemUnidentifiedName": "Talent",
       "stackDuplicates": false,
@@ -1754,7 +1723,17 @@
       "alternateDiagonalMovement": false,
       "rerollContextMenuLabel": "",
       "onReroll": "",
-      "rerollIgnoresAdvDis": false
+      "rerollIgnoresAdvDis": false,
+      "onCampaignLoad": {
+        "file": "rollhandlers/onCampaignLoad.js"
+      },
+      "campaignPanel": {
+        "name": "Story Points",
+        "icon": "IconBook",
+        "file": "story-points-panel.html",
+        "width": 520,
+        "height": 300
+      }
     },
     "healthIndicator": {
       "disabled": false,

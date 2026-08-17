@@ -1,0 +1,399 @@
+<script>
+  // ============================================================
+  // Story Points campaign panel (Genesys)
+  // ============================================================
+  // Two shared pools of Story Points stored in campaign variables
+  // `playerStoryPoints` / `gmStoryPoints`. Per the rules, spending a point
+  // moves it to the other pool — here that's a drag across the center
+  // divider (from either side, by anyone at the table). The + / - buttons
+  // beside each count let the GM set up the pools at the start of a session
+  // (one per player in the Player Pool, one in the GM Pool); players can
+  // use them too.
+
+  var SP_MAX_TOTAL = 30;
+
+  function spCounts() {
+    var player = api.getCampaignVariable("playerStoryPoints");
+    var gm = api.getCampaignVariable("gmStoryPoints");
+    return {
+      player: typeof player === "number" && player > 0 ? Math.floor(player) : 0,
+      gm: typeof gm === "number" && gm > 0 ? Math.floor(gm) : 0,
+    };
+  }
+
+  function spVarName(side) {
+    return side === "player" ? "playerStoryPoints" : "gmStoryPoints";
+  }
+
+  function spLayout() {
+    var c = api.getCanvas("storyPointsCanvas");
+    if (!c) return null;
+    var W = c.width;
+    var H = c.height;
+    // Buttons live in the header beside each count, so nothing is anchored
+    // to the bottom edge — growing the window only grows the token area.
+    var headerH = 56;
+    return {
+      W: W,
+      H: H,
+      headerH: headerH,
+      poolTop: headerH,
+      poolBottom: H,
+      midX: W / 2,
+    };
+  }
+
+  function spTokenSpots(side, count, lay) {
+    var pad = 12;
+    var x0 = side === "player" ? pad : lay.midX + pad;
+    var x1 = side === "player" ? lay.midX - pad : lay.W - pad;
+    var y0 = lay.poolTop + pad;
+    var y1 = lay.poolBottom - pad;
+    var availW = Math.max(40, x1 - x0);
+    var availH = Math.max(40, y1 - y0);
+
+    var d = 56;
+    var gap = 8;
+    var cols = 1;
+    while (d > 26) {
+      cols = Math.max(1, Math.floor((availW + gap) / (d + gap)));
+      var rows = Math.max(1, Math.floor((availH + gap) / (d + gap)));
+      if (cols * rows >= count) break;
+      d -= 4;
+    }
+
+    var spots = [];
+    for (var i = 0; i < count; i++) {
+      var row = Math.floor(i / cols);
+      var col = i % cols;
+      var rowCount = Math.min(cols, count - row * cols);
+      var rowW = rowCount * d + (rowCount - 1) * gap;
+      var x = x0 + (availW - rowW) / 2 + col * (d + gap) + d / 2;
+      var y = y0 + row * (d + gap) + d / 2;
+      spots.push({ x: x, y: y, r: d / 2 });
+    }
+    return spots;
+  }
+
+  function spButtons(side, lay) {
+    var cx = side === "player" ? lay.midX / 2 : lay.midX + lay.midX / 2;
+    var y = 38;
+    var r = 11;
+    return {
+      minus: { x: cx - 36, y: y, r: r },
+      plus: { x: cx + 36, y: y, r: r },
+    };
+  }
+
+  // A Story Point token: player side is a bright "protagonist" gold orb, GM
+  // side a deep violet one. Drawn with gradients so no images are needed.
+  function spDrawToken(c, side, x, y, r, alpha) {
+    var isPlayer = side === "player";
+    c.save();
+    if (alpha !== undefined) c.setGlobalAlpha(alpha);
+
+    // Soft outer glow
+    var glow = c.createRadialGradient(x, y, r * 0.5, x, y, r * 1.0, [
+      [0, isPlayer ? "rgba(255,190,80,0.55)" : "rgba(150,90,220,0.55)"],
+      [1, "rgba(0,0,0,0)"],
+    ]);
+    c.setFillStyle(glow);
+    c.beginPath();
+    c.arc(x, y, r, 0, Math.PI * 2);
+    c.fill();
+
+    // Orb body, lit from the upper left
+    var body = c.createRadialGradient(
+      x - r * 0.3,
+      y - r * 0.35,
+      r * 0.1,
+      x,
+      y,
+      r * 0.85,
+      isPlayer
+        ? [
+            [0, "#ffe9b0"],
+            [0.5, "#f2b03c"],
+            [1, "#8a5a10"],
+          ]
+        : [
+            [0, "#d9c2ff"],
+            [0.5, "#7a4fc9"],
+            [1, "#2e1a54"],
+          ],
+    );
+    c.setFillStyle(body);
+    c.beginPath();
+    c.arc(x, y, r * 0.85, 0, Math.PI * 2);
+    c.fill();
+
+    // Rim
+    c.setLineWidth(1.5);
+    c.setStrokeStyle(
+      isPlayer ? "rgba(255,214,130,0.9)" : "rgba(180,140,255,0.9)",
+    );
+    c.beginPath();
+    c.arc(x, y, r * 0.85, 0, Math.PI * 2);
+    c.stroke();
+
+    c.restore();
+  }
+
+  function spDrawButton(c, btn, label, hovered) {
+    c.save();
+    c.beginPath();
+    c.arc(btn.x, btn.y, btn.r, 0, Math.PI * 2);
+    c.setFillStyle(
+      hovered ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.08)",
+    );
+    c.fill();
+    c.setLineWidth(1);
+    c.setStrokeStyle("rgba(255,255,255,0.35)");
+    c.stroke();
+    c.setFillStyle("#e8e8e8");
+    c.setFont("600 16px sans-serif");
+    c.setTextAlign("center");
+    c.setTextBaseline("middle");
+    c.fillText(label, btn.x, btn.y + 1);
+    c.restore();
+  }
+
+  function paintStoryPoints() {
+    var c = api.getCanvas("storyPointsCanvas");
+    var lay = spLayout();
+    if (!c || !lay) return;
+    var counts = spCounts();
+    var drag = api.getSession("spDrag") || null;
+    var hover = api.getSession("spHover") || null;
+
+    c.clearRect(0, 0, lay.W, lay.H);
+
+    // Pool backgrounds
+    var playerBg = c.createLinearGradient(0, 0, lay.midX, 0, [
+      [0, "rgba(160,105,20,0.30)"],
+      [1, "rgba(160,105,20,0.08)"],
+    ]);
+    c.setFillStyle(playerBg);
+    c.fillRect(0, 0, lay.midX, lay.H);
+    var gmBg = c.createLinearGradient(lay.midX, 0, lay.W, 0, [
+      [0, "rgba(80,40,140,0.08)"],
+      [1, "rgba(80,40,140,0.30)"],
+    ]);
+    c.setFillStyle(gmBg);
+    c.fillRect(lay.midX, 0, lay.midX, lay.H);
+
+    // Divider — emphasized during a drag as the "flip it across" hint
+    c.save();
+    c.setLineWidth(drag ? 2 : 1);
+    c.setStrokeStyle(drag ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.2)");
+    if (drag) c.setLineDash([6, 4]);
+    c.beginPath();
+    c.moveTo(lay.midX, 8);
+    c.lineTo(lay.midX, lay.H - 8);
+    c.stroke();
+    c.restore();
+
+    // Headers
+    c.save();
+    c.setTextAlign("center");
+    c.setTextBaseline("middle");
+    c.setFont("700 15px sans-serif");
+    c.setFillStyle("#ffca7a");
+    c.fillText("PLAYER POOL", lay.midX / 2, 16);
+    c.setFillStyle("#c9a6ff");
+    c.fillText("GM POOL", lay.midX + lay.midX / 2, 16);
+    c.setFont("700 17px sans-serif");
+    c.setFillStyle("#e8e8e8");
+    c.fillText(String(counts.player), lay.midX / 2, 35);
+    c.fillText(String(counts.gm), lay.midX + lay.midX / 2, 35);
+    c.restore();
+
+    // Tokens
+    var sides = ["player", "gm"];
+    for (var s = 0; s < sides.length; s++) {
+      var side = sides[s];
+      var count = side === "player" ? counts.player : counts.gm;
+      var drawCount =
+        drag && drag.side === side ? Math.max(0, count - 1) : count;
+      var spots = spTokenSpots(side, drawCount, lay);
+      for (var i = 0; i < spots.length; i++) {
+        spDrawToken(c, side, spots[i].x, spots[i].y, spots[i].r);
+      }
+      if (
+        !drag &&
+        hover &&
+        hover.type === "pool" &&
+        hover.side === side &&
+        count > 0
+      ) {
+        var hs = spots[spots.length - 1];
+        if (hs) {
+          c.save();
+          c.beginPath();
+          c.arc(hs.x, hs.y, hs.r + 3, 0, Math.PI * 2);
+          c.setLineWidth(2);
+          c.setStrokeStyle("rgba(255,255,255,0.7)");
+          c.stroke();
+          c.restore();
+        }
+      }
+      var btns = spButtons(side, lay);
+      spDrawButton(
+        c,
+        btns.minus,
+        "−",
+        !!(hover && hover.type === "minus" && hover.side === side),
+      );
+      spDrawButton(
+        c,
+        btns.plus,
+        "+",
+        !!(hover && hover.type === "plus" && hover.side === side),
+      );
+    }
+
+    // Drag ghost: preview as the TARGET pool's token once across the line
+    if (drag && drag.x !== undefined) {
+      var overSide = drag.x < lay.midX ? "player" : "gm";
+      if (overSide !== drag.side) {
+        spDrawToken(c, overSide, drag.x, drag.y, drag.r, 0.85);
+      } else {
+        spDrawToken(c, drag.side, drag.x, drag.y, drag.r, 0.6);
+      }
+    }
+  }
+
+  function spDist(x0, y0, x1, y1) {
+    var dx = x1 - x0;
+    var dy = y1 - y0;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  function spHit(x, y) {
+    var lay = spLayout();
+    if (!lay) return null;
+    var counts = spCounts();
+    var sides = ["player", "gm"];
+    for (var s = 0; s < sides.length; s++) {
+      var side = sides[s];
+      var btns = spButtons(side, lay);
+      if (spDist(x, y, btns.minus.x, btns.minus.y) <= btns.minus.r + 3) {
+        return { type: "minus", side: side };
+      }
+      if (spDist(x, y, btns.plus.x, btns.plus.y) <= btns.plus.r + 3) {
+        return { type: "plus", side: side };
+      }
+      var count = side === "player" ? counts.player : counts.gm;
+      var spots = spTokenSpots(side, count, lay);
+      for (var i = 0; i < spots.length; i++) {
+        if (spDist(x, y, spots[i].x, spots[i].y) <= spots[i].r) {
+          return { type: "pool", side: side, r: spots[i].r };
+        }
+      }
+    }
+    return null;
+  }
+
+  // Spend a point: it always moves to the OTHER pool.
+  function spSpendPoint(fromSide) {
+    var counts = spCounts();
+    if ((fromSide === "player" ? counts.player : counts.gm) <= 0) return;
+    var toSide = fromSide === "player" ? "gm" : "player";
+    api.updateCampaignVariable(spVarName(fromSide), function (v) {
+      return Math.max(0, (v || 0) - 1);
+    });
+    api.updateCampaignVariable(spVarName(toSide), function (v) {
+      return (v || 0) + 1;
+    });
+  }
+
+  function spAddPoint(side) {
+    var counts = spCounts();
+    if (counts.player + counts.gm >= SP_MAX_TOTAL) return;
+    api.updateCampaignVariable(spVarName(side), function (v) {
+      return (v || 0) + 1;
+    });
+  }
+
+  function spRemovePoint(side) {
+    api.updateCampaignVariable(spVarName(side), function (v) {
+      return Math.max(0, (v || 0) - 1);
+    });
+  }
+
+  // Event handlers --------------------------------------------------------
+
+  function onSpDown() {
+    var hit = spHit(event.x, event.y);
+    if (hit && hit.type === "pool") {
+      api.setSession("spDrag", {
+        side: hit.side,
+        r: hit.r,
+        x: event.x,
+        y: event.y,
+      });
+      paintStoryPoints();
+    }
+  }
+
+  function onSpMove() {
+    var drag = api.getSession("spDrag");
+    if (drag) {
+      drag.x = event.x;
+      drag.y = event.y;
+      api.setSession("spDrag", drag);
+      paintStoryPoints();
+      return;
+    }
+    var hit = spHit(event.x, event.y);
+    var prev = api.getSession("spHover");
+    var changed =
+      (hit ? hit.type + hit.side : "") !== (prev ? prev.type + prev.side : "");
+    if (changed) {
+      api.setSession("spHover", hit);
+      paintStoryPoints();
+    }
+  }
+
+  function onSpUp() {
+    var lay = spLayout();
+    var drag = api.getSession("spDrag");
+    api.setSession("spDrag", null);
+    if (drag && lay) {
+      var overSide = event.x < lay.midX ? "player" : "gm";
+      if (overSide !== drag.side) {
+        spSpendPoint(drag.side);
+      }
+    }
+    paintStoryPoints();
+  }
+
+  function onSpClick() {
+    var hit = spHit(event.x, event.y);
+    if (!hit) return;
+    if (hit.type === "plus") spAddPoint(hit.side);
+    if (hit.type === "minus") spRemovePoint(hit.side);
+  }
+
+  function onSpLeave() {
+    api.setSession("spDrag", null);
+    api.setSession("spHover", null);
+    paintStoryPoints();
+  }
+</script>
+
+<div style="width: 100%; height: 100%; min-height: 220px; background: #0d0b10">
+  <canvas
+    field="storyPointsCanvas"
+    autosize="true"
+    style="width: 100%; height: 100%; display: block; cursor: pointer"
+    onload="paintStoryPoints()"
+    onresize="paintStoryPoints()"
+    onrecordchange="paintStoryPoints()"
+    onmousedown="onSpDown()"
+    onmousemove="onSpMove()"
+    onmouseup="onSpUp()"
+    onclick="onSpClick()"
+    onmouseleave="onSpLeave()"
+  ></canvas>
+</div>
