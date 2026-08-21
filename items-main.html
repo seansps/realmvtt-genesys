@@ -24,6 +24,7 @@
       [`${pathToFields}.armorProperties.hidden`]: true,
       [`${pathToFields}.weaponAttachedLabel.hidden`]: true,
       [`${pathToFields}.firingArc.hidden`]: true,
+      [`${pathToFields}.personalScale.hidden`]: true,
       [`${pathToFields}.weaponAttached.hidden`]: true,
       [`${pathToFields}.noAddBrawn.hidden`]: true,
       [`${pathToFields}.consumableProperties.hidden`]:
@@ -177,8 +178,10 @@
 
     if (subType?.toLowerCase()?.includes("vehicle")) {
       api.setHidden("firingArc", false);
+      api.setHidden("personalScale", false);
     } else {
       api.setHidden("firingArc", true);
+      api.setHidden("personalScale", true);
     }
   }
 
@@ -463,6 +466,18 @@
       item?.fields?.firingArc?.hidden !== true
     ) {
       valuesToSet[`${pathToFields}.firingArc.hidden`] = true;
+    }
+
+    if (
+      subType?.toLowerCase()?.includes("vehicle") &&
+      item?.fields?.personalScale?.hidden !== false
+    ) {
+      valuesToSet[`${pathToFields}.personalScale.hidden`] = false;
+    } else if (
+      !subType?.toLowerCase()?.includes("vehicle") &&
+      item?.fields?.personalScale?.hidden !== true
+    ) {
+      valuesToSet[`${pathToFields}.personalScale.hidden`] = true;
     }
 
     if (
@@ -1139,6 +1154,17 @@
 {"label": "Port", "value": "port"}, {"label": "Starboard", "value": "starboard"},
 {"label": "Dorsal", "value": "dorsal"}, {"label": "Ventral", "value": "ventral"}]'
   ></dropdown>
+
+  <!-- Some vehicle-mounted weapons use personal scale for their entire profile -->
+  <div style="margin-top: 8px">
+    <checkbox
+      field="personalScale"
+      label="Personal Scale Weapon"
+      textalign="left"
+      size="sm"
+      hidden="true"
+    ></checkbox>
+  </div>
 
   <!-- Description -->
 

@@ -2482,6 +2482,11 @@ function rollAttack(
   scale = "personal",
   difficultyOverride = undefined,
 ) {
+  // Some vehicle-mounted weapons use personal scale for their entire profile
+  // (e.g. a forward-mounted light repeating blaster on a speeder bike).
+  if (weapon.data?.personalScale === true) {
+    scale = "personal";
+  }
   const isMelee = weapon.data?.type === "melee weapon";
   let skill = weapon.data?.weaponSkill || weapon.data?.skillCheck || "";
   if (skill === "") {
@@ -3238,8 +3243,14 @@ function useItem(record, itemDataPath) {
     ? parseInt(checkForReplacements(damage, {}, record), 10)
     : 0;
   // If this is being used by a vehicle, use the planetary damage macro
+  // unless the item is explicitly flagged as a personal scale weapon
   let scale = "personal";
-  if (record.data?.type === "vehicle" || record.recordType === "vehicles") {
+  const isPersonalScaleItem =
+    api.getValueOnRecord(record, `${itemDataPath}.data.personalScale`) === true;
+  if (
+    !isPersonalScaleItem &&
+    (record.data?.type === "vehicle" || record.recordType === "vehicles")
+  ) {
     scale = "planetary";
   }
   const damageMacro =
