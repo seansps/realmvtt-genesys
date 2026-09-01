@@ -802,22 +802,139 @@ function recalculateTalentLabel(record, moreValuesToSet = undefined) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Characteristic bonuses (Brawn, Agility, Intellect, Cunning, Willpower,
+// Presence) granted by talents, species features and equipped items.
+//
+// Base/bonus pattern:
+//   data.{char}Base  - the value the player bought/rolled (player-owned)
+//   data.{char}Bonus - sum of every characteristicBonus modifier
+//   data.{char}Set   - highest characteristicSet value, applied as a floor
+//   data.{char}      - effective score shown on the sheet and used in rolls
+//
+// Everything is re-derived from the record's current talents/items on each
+// call, so removing a talent or unequipping an item reverts the change with no
+// per-source bookkeeping.
+// ---------------------------------------------------------------------------
+const CHARACTERISTICS = [
+  "brawn",
+  "agility",
+  "intellect",
+  "cunning",
+  "willpower",
+  "presence",
+];
+
+function collectCharacteristicModifiers(record, type) {
+  // getEffectsAndModifiersForToken already walks species features, talents
+  // (duplicated per rank), NPC features, critical injuries, equipped items and
+  // their attachments, and drops modifiers flagged itemOnly.
+  const byCharacteristic = {};
+  getEffectsAndModifiersForToken(record, [type]).forEach((mod) => {
+    const characteristic = String(mod.field || "")
+      .trim()
+      .toLowerCase();
+    if (!CHARACTERISTICS.includes(characteristic)) {
+      return;
+    }
+    const value = parseInt(mod.value, 10);
+    if (isNaN(value)) {
+      return;
+    }
+    if (type === "characteristicSet") {
+      // "Set" modifiers don't stack - the highest one wins.
+      byCharacteristic[characteristic] =
+        characteristic in byCharacteristic
+          ? Math.max(byCharacteristic[characteristic], value)
+          : value;
+    } else {
+      byCharacteristic[characteristic] =
+        (byCharacteristic[characteristic] || 0) + value;
+    }
+  });
+  return byCharacteristic;
+}
+
+function recalcCharacteristicBonuses(record, valuesToSet) {
+  if (!record) {
+    return;
+  }
+
+  const totalBonus = collectCharacteristicModifiers(
+    record,
+    "characteristicBonus",
+  );
+  const setFloor = collectCharacteristicModifiers(record, "characteristicSet");
+
+  CHARACTERISTICS.forEach((characteristic) => {
+    const newBonus = totalBonus[characteristic] || 0;
+    const newSet =
+      characteristic in setFloor ? setFloor[characteristic] : null;
+
+    const rawBase =
+      valuesToSet[`data.${characteristic}Base`] !== undefined
+        ? valuesToSet[`data.${characteristic}Base`]
+        : record?.data?.[`${characteristic}Base`];
+
+    let base;
+    if (rawBase !== undefined && rawBase !== null && rawBase !== "") {
+      base = parseInt(rawBase, 10) || 0;
+    } else {
+      // First pass on a character created before this system existed: the score
+      // currently on the sheet, minus whatever bonus was already folded into
+      // it, is the base.
+      const rawScore =
+        valuesToSet[`data.${characteristic}`] !== undefined
+          ? valuesToSet[`data.${characteristic}`]
+          : record?.data?.[characteristic];
+      const currentScore = parseInt(rawScore || "0", 10) || 0;
+      const oldBonus =
+        parseInt(record?.data?.[`${characteristic}Bonus`] || "0", 10) || 0;
+      base = currentScore - oldBonus;
+      valuesToSet[`data.${characteristic}Base`] = base;
+    }
+
+    let total = base + newBonus;
+    // A "set" is a floor, not an override: it has no effect if the score is
+    // already at or above it.
+    if (newSet !== null && total < newSet) {
+      total = newSet;
+    }
+
+    valuesToSet[`data.${characteristic}Bonus`] = newBonus;
+    valuesToSet[`data.${characteristic}Set`] = newSet;
+    valuesToSet[`data.${characteristic}`] = total;
+  });
+}
+
+// Manual edit of a characteristic on the sheet. The typed value becomes the new
+// base; the effective score is re-derived so any talent/item bonus stays on top.
+function onCharacteristicChanged(record, characteristic, value) {
+  const valuesToSet = {};
+  const parsed = parseInt(value || "0", 10);
+  valuesToSet[`data.${characteristic}Base`] = isNaN(parsed) ? 0 : parsed;
+  updateAttributes(record, valuesToSet);
+  api.setValues(valuesToSet);
+}
+
 function updateAttributes(record, moreValuesToSet = undefined) {
   const valuesToSet = moreValuesToSet || {};
 
+  // Re-derive the effective characteristics from base + talent/item modifiers
+  // before anything downstream (thresholds, soak, encumbrance) reads them.
+  recalcCharacteristicBonuses(record, valuesToSet);
+
   // List of all characteristics
-  const characteristics = [
-    "brawn",
-    "agility",
-    "intellect",
-    "cunning",
-    "willpower",
-    "presence",
-  ];
+  const characteristics = CHARACTERISTICS;
 
   // Update each characteristic using updateAttribute
   characteristics.forEach((attribute) => {
-    const currentValue = parseInt(record?.data?.[attribute] || "0", 10);
+    const currentValue = parseInt(
+      (valuesToSet[`data.${attribute}`] !== undefined
+        ? valuesToSet[`data.${attribute}`]
+        : record?.data?.[attribute]) || "0",
+      10,
+    );
     updateAttribute({
       record,
       attribute,
@@ -1448,10 +1565,13 @@ function recalculateThresholds(record, moreValuesToSet = undefined) {
 
   // Get current attribute values
   let brawn = parseInt(record?.data?.brawn || "0", 10);
-  if (moreValuesToSet["data.brawn"]) {
-    brawn = moreValuesToSet["data.brawn"];
+  if (moreValuesToSet && moreValuesToSet["data.brawn"] !== undefined) {
+    brawn = parseInt(moreValuesToSet["data.brawn"] || "0", 10) || 0;
   }
-  const willpower = parseInt(record?.data?.willpower || "0", 10);
+  let willpower = parseInt(record?.data?.willpower || "0", 10);
+  if (moreValuesToSet && moreValuesToSet["data.willpower"] !== undefined) {
+    willpower = parseInt(moreValuesToSet["data.willpower"] || "0", 10) || 0;
+  }
 
   // Calculate base thresholds (species + attribute)
   const baseWoundThreshold = speciesWoundThreshold + brawn;
@@ -1494,6 +1614,36 @@ function recalculateThresholds(record, moreValuesToSet = undefined) {
   const woundBonusDifference = totalWoundBonus - previousWoundBonus;
   const strainBonusDifference = totalStrainBonus - previousStrainBonus;
 
+  // Wound/Strain thresholds are stored as absolutes (players buy them up with
+  // XP), so a change in Brawn/Willpower - including one coming from a
+  // characteristicBonus/characteristicSet on a talent or equipped item - is
+  // applied as a delta. The last-seen characteristic is stored alongside so the
+  // first pass on an existing character is a no-op rather than a double count.
+  // On a record that predates this tracking, the stored threshold was built
+  // from whatever the score was BEFORE this pass, so fall back to that rather
+  // than to the freshly-bonused value - otherwise a migration pass that also
+  // adds a bonus (dropping a +1 Brawn talent on an old character) silently
+  // swallows the increase.
+  const rawTrackedBrawn = record?.data?.woundThresholdBrawn;
+  const trackedBrawn =
+    rawTrackedBrawn === undefined ||
+    rawTrackedBrawn === null ||
+    rawTrackedBrawn === ""
+      ? parseInt(record?.data?.brawn || "0", 10) || 0
+      : parseInt(rawTrackedBrawn, 10) || 0;
+  const brawnDifference = brawn - trackedBrawn;
+
+  const rawTrackedWillpower = record?.data?.strainThresholdWillpower;
+  const trackedWillpower =
+    rawTrackedWillpower === undefined ||
+    rawTrackedWillpower === null ||
+    rawTrackedWillpower === ""
+      ? parseInt(record?.data?.willpower || "0", 10) || 0
+      : parseInt(rawTrackedWillpower, 10) || 0;
+  const willpowerDifference = willpower - trackedWillpower;
+  valuesToSet["data.woundThresholdBrawn"] = brawn;
+  valuesToSet["data.strainThresholdWillpower"] = willpower;
+
   // Set the new threshold values
   // Only set base threshold if it's undefined (first time)
   if (record?.data?.woundThreshold === undefined) {
@@ -1501,7 +1651,9 @@ function recalculateThresholds(record, moreValuesToSet = undefined) {
   } else {
     // Add the difference in bonuses to the current threshold
     valuesToSet["data.woundThreshold"] =
-      parseInt(record?.data?.woundThreshold || "0", 10) + woundBonusDifference;
+      parseInt(record?.data?.woundThreshold || "0", 10) +
+      woundBonusDifference +
+      brawnDifference;
   }
 
   if (record?.data?.strainThreshold === undefined) {
@@ -1510,7 +1662,8 @@ function recalculateThresholds(record, moreValuesToSet = undefined) {
     // Add the difference in bonuses to the current threshold
     valuesToSet["data.strainThreshold"] =
       parseInt(record?.data?.strainThreshold || "0", 10) +
-      strainBonusDifference;
+      strainBonusDifference +
+      willpowerDifference;
   }
 
   // Store the current bonus values for future reference
