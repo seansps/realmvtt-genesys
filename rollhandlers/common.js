@@ -1614,35 +1614,11 @@ function recalculateThresholds(record, moreValuesToSet = undefined) {
   const woundBonusDifference = totalWoundBonus - previousWoundBonus;
   const strainBonusDifference = totalStrainBonus - previousStrainBonus;
 
-  // Wound/Strain thresholds are stored as absolutes (players buy them up with
-  // XP), so a change in Brawn/Willpower - including one coming from a
-  // characteristicBonus/characteristicSet on a talent or equipped item - is
-  // applied as a delta. The last-seen characteristic is stored alongside so the
-  // first pass on an existing character is a no-op rather than a double count.
-  // On a record that predates this tracking, the stored threshold was built
-  // from whatever the score was BEFORE this pass, so fall back to that rather
-  // than to the freshly-bonused value - otherwise a migration pass that also
-  // adds a bonus (dropping a +1 Brawn talent on an old character) silently
-  // swallows the increase.
-  const rawTrackedBrawn = record?.data?.woundThresholdBrawn;
-  const trackedBrawn =
-    rawTrackedBrawn === undefined ||
-    rawTrackedBrawn === null ||
-    rawTrackedBrawn === ""
-      ? parseInt(record?.data?.brawn || "0", 10) || 0
-      : parseInt(rawTrackedBrawn, 10) || 0;
-  const brawnDifference = brawn - trackedBrawn;
-
-  const rawTrackedWillpower = record?.data?.strainThresholdWillpower;
-  const trackedWillpower =
-    rawTrackedWillpower === undefined ||
-    rawTrackedWillpower === null ||
-    rawTrackedWillpower === ""
-      ? parseInt(record?.data?.willpower || "0", 10) || 0
-      : parseInt(rawTrackedWillpower, 10) || 0;
-  const willpowerDifference = willpower - trackedWillpower;
-  valuesToSet["data.woundThresholdBrawn"] = brawn;
-  valuesToSet["data.strainThresholdWillpower"] = willpower;
+  // Wound/Strain thresholds are set ONCE, at character creation, to
+  // species + Brawn/Willpower. After that they are static: only
+  // woundThresholdBonus / strainThresholdBonus modifiers (and XP purchases the
+  // player types in) move them. A characteristicBonus/characteristicSet on
+  // Brawn or Willpower must NOT touch them - Brawn only feeds Soak.
 
   // Set the new threshold values
   // Only set base threshold if it's undefined (first time)
@@ -1651,9 +1627,7 @@ function recalculateThresholds(record, moreValuesToSet = undefined) {
   } else {
     // Add the difference in bonuses to the current threshold
     valuesToSet["data.woundThreshold"] =
-      parseInt(record?.data?.woundThreshold || "0", 10) +
-      woundBonusDifference +
-      brawnDifference;
+      parseInt(record?.data?.woundThreshold || "0", 10) + woundBonusDifference;
   }
 
   if (record?.data?.strainThreshold === undefined) {
@@ -1662,8 +1636,7 @@ function recalculateThresholds(record, moreValuesToSet = undefined) {
     // Add the difference in bonuses to the current threshold
     valuesToSet["data.strainThreshold"] =
       parseInt(record?.data?.strainThreshold || "0", 10) +
-      strainBonusDifference +
-      willpowerDifference;
+      strainBonusDifference;
   }
 
   // Store the current bonus values for future reference
