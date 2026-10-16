@@ -4,10 +4,11 @@
     api.setHidden("abilityProperties", damage === 0);
   }
 
-  function onAbilityPropertiesChange() {
+  function onAbilityPropertiesChange(newProperties = undefined) {
     const nearestParentDataPath = getNearestParentDataPath(dataPath);
     const ability = api.getValue(nearestParentDataPath) || record;
-    const properties = ability?.data?.special || [];
+    // The record isn't updated yet during onchange, so prefer the new value
+    const properties = newProperties || ability?.data?.special || [];
 
     // If this is an nested item, just return. (Like a weapon attachment)
     let pathToFields = "fields";
@@ -173,7 +174,7 @@
         placeholder="Select Ability Properties..."
         multiselect="28"
         searchable="true"
-        onchange="onAbilityPropertiesChange();"
+        onchange="onAbilityPropertiesChange(value);"
         options='[{"label": "Accurate (Passive)", "value": "accurate"}, 
         {"label": "Auto-Fire (Active)", "value": "auto-fire"}, 
         {"label": "Breach (Passive)", "value": "breach"}, 
