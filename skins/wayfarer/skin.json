@@ -1,0 +1,1040 @@
+{
+  "name": "Wayfarer",
+  "description": "Tooled leather, linen pages and brass trim for high-fantasy campaigns.",
+  "colorScheme": "dark",
+  "radius": 4,
+  "palette": {
+    "colors": {
+      "primary": [
+        "#f6efe6",
+        "#e6d6c2",
+        "#d2b99a",
+        "#bd9b74",
+        "#a88058",
+        "#946b45",
+        "#7d5737",
+        "#66462b",
+        "#503621",
+        "#3b2717"
+      ],
+      "secondary": [
+        "#fbf5e8",
+        "#f1e3c3",
+        "#e5cf9c",
+        "#d8bd8a",
+        "#c9a56b",
+        "#b08d57",
+        "#977645",
+        "#7c5f36",
+        "#614a29",
+        "#46351c"
+      ],
+      "tertiary": [
+        "#eef4e6",
+        "#d6e5c4",
+        "#b9d29c",
+        "#9bbe75",
+        "#7fa955",
+        "#6a9343",
+        "#577a36",
+        "#45612a",
+        "#344920",
+        "#233116"
+      ],
+      "dark": [
+        "#ddd2c3",
+        "#c2b4a1",
+        "#a49380",
+        "#75665a",
+        "#4e4239",
+        "#3a3029",
+        "#2c241e",
+        "#221b16",
+        "#18130f",
+        "#0f0c09"
+      ],
+      "red": [
+        "#fbe9e6",
+        "#f2c9c2",
+        "#e6a297",
+        "#d77a6b",
+        "#c85a49",
+        "#b44634",
+        "#963a2b",
+        "#7a2a22",
+        "#5e2019",
+        "#431611"
+      ],
+      "green": [
+        "#eef6e9",
+        "#d4e9c8",
+        "#b4d8a0",
+        "#93c678",
+        "#76b557",
+        "#5fa043",
+        "#4f8a37",
+        "#447a30",
+        "#3d6b2a",
+        "#2c4f1e"
+      ]
+    },
+    "primaryShade": 7,
+    "other": {
+      "windowBgColor": "#e7e2d4",
+      "windowHeaderBgColor": "#33241a",
+      "windowHeaderFontColor": "#ece4d2",
+      "windowHeaderButtonHoverBgColor": "rgba(255,255,255,0.1)",
+      "windowBorderColor": "#2a1d14",
+      "windowDividerColor": "rgba(60,40,20,0.2)",
+      "chatCardBgColor": "#e7e2d4",
+      "chatCardFontColor": "#231c16",
+      "chatCardBorderColor": "#6e5a45",
+      "chatCardDividerColor": "rgba(60,40,20,0.2)"
+    }
+  },
+  "tokens": {
+    "accent": "#d8bd8a",
+    "accent-glow": "rgba(216,189,138,0.35)",
+    "accent-subtle": "rgba(176,141,87,0.12)",
+    "bg": "#221812",
+    "surface": "#2e2219",
+    "surface-elev": "#3a2b20",
+    "text": "#efe6d6",
+    "text-dim": "#c2b39c",
+    "text-muted": "rgba(194,179,156,0.65)",
+    "border": "rgba(216,189,138,0.2)",
+    "border-strong": "rgba(216,189,138,0.4)",
+    "divider": "rgba(216,189,138,0.14)",
+    "danger": "#d77a6b",
+    "success": "#9bbe75",
+    "display-name": "#d8bd8a"
+  },
+  "fonts": [
+    {
+      "family": "IM Fell English SC",
+      "src": "fonts/IMFellEnglishSC-Regular.ttf",
+      "weight": 400
+    },
+    {
+      "family": "Alegreya",
+      "src": "fonts/Alegreya-wght.ttf",
+      "weight": 700
+    }
+  ],
+  "fontRoles": {
+    "heading": "Alegreya",
+    "windowTitle": "IM Fell English SC",
+    "modalTitle": "IM Fell English SC"
+  },
+  "frames": {
+    "appBar": {
+      "background": "#1c140e",
+      "border": "#000000"
+    },
+    "drawer": {
+      "texture": {
+        "src": "frames/leather.png",
+        "scale": 2
+      },
+      "background": "#4a3527",
+      "border": "#2a1d14",
+      "borderWidth": 2,
+      "shadow": "rgba(0,0,0,0.8)"
+    },
+    "drawerTab": {
+      "border": "rgba(0,0,0,0)",
+      "radius": 12,
+      "textColor": "#ece4d2"
+    },
+    "drawerTabActive": {
+      "background": "rgba(176,141,87,0.28)",
+      "border": "#b08d57",
+      "radius": 12,
+      "textColor": "#fff8ea"
+    },
+    "window": {
+      "texture": {
+        "src": "frames/leather-dark.png",
+        "scale": 2
+      },
+      "background": "#33241a",
+      "border": "#2a1d14",
+      "borderWidth": 2,
+      "radius": 6,
+      "shadow": "rgba(0,0,0,0.85)"
+    },
+    "windowHeader": {
+      "background": "rgba(0,0,0,0)",
+      "textColor": "#ece4d2"
+    },
+    "recordWindowHeader": {
+      "background": "rgba(0,0,0,0)",
+      "textColor": "#ece4d2"
+    },
+    "windowContent": {
+      "texture": {
+        "src": "frames/linen.png",
+        "scale": 2
+      },
+      "background": "#e7e2d4",
+      "textColor": "#231c16",
+      "scheme": "light",
+      "tokens": {
+        "accent": "#6b4a2f",
+        "accent-glow": "rgba(107,74,47,0.25)",
+        "accent-subtle": "rgba(107,74,47,0.08)",
+        "bg": "rgba(0,0,0,0)",
+        "surface": "rgba(60,40,20,0.06)",
+        "surface-elev": "rgba(60,40,20,0.11)",
+        "text": "#231c16",
+        "text-dim": "#4e4237",
+        "text-muted": "rgba(78,66,55,0.75)",
+        "border": "#8f8170",
+        "border-strong": "#4e4237",
+        "divider": "rgba(60,40,20,0.2)",
+        "danger": "#7a2a22",
+        "success": "#3f6b2f",
+        "display-name": "#5a3a22"
+      },
+      "darkShades": [
+        "#231c16",
+        "#352b22",
+        "#4e4237",
+        "#6e6153",
+        "#8f8170",
+        "rgba(60,40,20,0.1)",
+        "rgba(60,40,20,0.06)",
+        "rgba(60,40,20,0.03)",
+        "rgba(255,255,255,0.2)",
+        "#17110c"
+      ],
+      "grayShades": [
+        "#17110c",
+        "#231c16",
+        "#352b22",
+        "#4e4237",
+        "#6e6153",
+        "rgba(40,25,10,0.5)",
+        "rgba(40,25,10,0.35)",
+        "rgba(40,25,10,0.25)",
+        "rgba(40,25,10,0.18)",
+        "rgba(40,25,10,0.12)"
+      ]
+    },
+    "recordBody": {
+      "texture": {
+        "src": "frames/linen.png",
+        "scale": 2
+      },
+      "background": "#e7e2d4",
+      "textColor": "#231c16",
+      "scheme": "light",
+      "tokens": {
+        "accent": "#6b4a2f",
+        "accent-glow": "rgba(107,74,47,0.25)",
+        "accent-subtle": "rgba(107,74,47,0.08)",
+        "bg": "rgba(0,0,0,0)",
+        "surface": "rgba(60,40,20,0.06)",
+        "surface-elev": "rgba(60,40,20,0.11)",
+        "text": "#231c16",
+        "text-dim": "#4e4237",
+        "text-muted": "rgba(78,66,55,0.75)",
+        "border": "#8f8170",
+        "border-strong": "#4e4237",
+        "divider": "rgba(60,40,20,0.2)",
+        "danger": "#7a2a22",
+        "success": "#3f6b2f",
+        "display-name": "#5a3a22"
+      },
+      "darkShades": [
+        "#231c16",
+        "#352b22",
+        "#4e4237",
+        "#6e6153",
+        "#8f8170",
+        "rgba(60,40,20,0.1)",
+        "rgba(60,40,20,0.06)",
+        "rgba(60,40,20,0.03)",
+        "rgba(255,255,255,0.2)",
+        "#17110c"
+      ],
+      "grayShades": [
+        "#17110c",
+        "#231c16",
+        "#352b22",
+        "#4e4237",
+        "#6e6153",
+        "rgba(40,25,10,0.5)",
+        "rgba(40,25,10,0.35)",
+        "rgba(40,25,10,0.25)",
+        "rgba(40,25,10,0.18)",
+        "rgba(40,25,10,0.12)"
+      ],
+      "padding": [
+        6,
+        10,
+        6,
+        10
+      ]
+    },
+    "tabList": {
+      "background": "rgba(0,0,0,0)"
+    },
+    "tab": {
+      "textColor": "#cbbca5",
+      "hover": {
+        "textColor": "#fff8ea"
+      }
+    },
+    "tabActive": {
+      "texture": {
+        "src": "frames/linen.png",
+        "scale": 2
+      },
+      "background": "#e7e2d4",
+      "border": "rgba(0,0,0,0)",
+      "borderWidth": 0,
+      "radius": 0,
+      "textColor": "#231c16"
+    },
+    "sheetCorner": {
+      "hidden": true
+    },
+    "attributeCard": {
+      "padding": [
+        5,
+        4,
+        6,
+        4
+      ]
+    },
+    "chatCard": {
+      "texture": {
+        "src": "frames/linen.png",
+        "scale": 2
+      },
+      "background": "#e7e2d4",
+      "textColor": "#231c16",
+      "scheme": "light",
+      "tokens": {
+        "accent": "#6b4a2f",
+        "accent-glow": "rgba(107,74,47,0.25)",
+        "accent-subtle": "rgba(107,74,47,0.08)",
+        "bg": "rgba(0,0,0,0)",
+        "surface": "rgba(60,40,20,0.06)",
+        "surface-elev": "rgba(60,40,20,0.11)",
+        "text": "#231c16",
+        "text-dim": "#4e4237",
+        "text-muted": "rgba(78,66,55,0.75)",
+        "border": "#8f8170",
+        "border-strong": "#4e4237",
+        "divider": "rgba(60,40,20,0.2)",
+        "danger": "#7a2a22",
+        "success": "#3f6b2f",
+        "display-name": "#5a3a22"
+      },
+      "darkShades": [
+        "#231c16",
+        "#352b22",
+        "#4e4237",
+        "#6e6153",
+        "#8f8170",
+        "rgba(60,40,20,0.1)",
+        "rgba(60,40,20,0.06)",
+        "rgba(60,40,20,0.03)",
+        "rgba(255,255,255,0.2)",
+        "#17110c"
+      ],
+      "grayShades": [
+        "#17110c",
+        "#231c16",
+        "#352b22",
+        "#4e4237",
+        "#6e6153",
+        "rgba(40,25,10,0.5)",
+        "rgba(40,25,10,0.35)",
+        "rgba(40,25,10,0.25)",
+        "rgba(40,25,10,0.18)",
+        "rgba(40,25,10,0.12)"
+      ],
+      "border": "#6e5a45",
+      "borderWidth": 2,
+      "radius": 4
+    },
+    "chatCardWhisper": {
+      "texture": {
+        "src": "frames/linen-whisper.png",
+        "scale": 2
+      },
+      "background": "#e4dde4",
+      "textColor": "#231c16",
+      "scheme": "light",
+      "tokens": {
+        "accent": "#6b4a2f",
+        "accent-glow": "rgba(107,74,47,0.25)",
+        "accent-subtle": "rgba(107,74,47,0.08)",
+        "bg": "rgba(0,0,0,0)",
+        "surface": "rgba(60,40,20,0.06)",
+        "surface-elev": "rgba(60,40,20,0.11)",
+        "text": "#231c16",
+        "text-dim": "#4e4237",
+        "text-muted": "rgba(78,66,55,0.75)",
+        "border": "#8f8170",
+        "border-strong": "#4e4237",
+        "divider": "rgba(60,40,20,0.2)",
+        "danger": "#7a2a22",
+        "success": "#3f6b2f",
+        "display-name": "#5a3a22"
+      },
+      "darkShades": [
+        "#231c16",
+        "#352b22",
+        "#4e4237",
+        "#6e6153",
+        "#8f8170",
+        "rgba(60,40,20,0.1)",
+        "rgba(60,40,20,0.06)",
+        "rgba(60,40,20,0.03)",
+        "rgba(255,255,255,0.2)",
+        "#17110c"
+      ],
+      "grayShades": [
+        "#17110c",
+        "#231c16",
+        "#352b22",
+        "#4e4237",
+        "#6e6153",
+        "rgba(40,25,10,0.5)",
+        "rgba(40,25,10,0.35)",
+        "rgba(40,25,10,0.25)",
+        "rgba(40,25,10,0.18)",
+        "rgba(40,25,10,0.12)"
+      ],
+      "border": "#5e4a6e",
+      "borderWidth": 2,
+      "radius": 4
+    },
+    "chatCardPrivate": {
+      "texture": {
+        "src": "frames/linen-private.png",
+        "scale": 2
+      },
+      "background": "#e8dcc4",
+      "textColor": "#231c16",
+      "scheme": "light",
+      "tokens": {
+        "accent": "#6b4a2f",
+        "accent-glow": "rgba(107,74,47,0.25)",
+        "accent-subtle": "rgba(107,74,47,0.08)",
+        "bg": "rgba(0,0,0,0)",
+        "surface": "rgba(60,40,20,0.06)",
+        "surface-elev": "rgba(60,40,20,0.11)",
+        "text": "#231c16",
+        "text-dim": "#4e4237",
+        "text-muted": "rgba(78,66,55,0.75)",
+        "border": "#8f8170",
+        "border-strong": "#4e4237",
+        "divider": "rgba(60,40,20,0.2)",
+        "danger": "#7a2a22",
+        "success": "#3f6b2f",
+        "display-name": "#5a3a22"
+      },
+      "darkShades": [
+        "#231c16",
+        "#352b22",
+        "#4e4237",
+        "#6e6153",
+        "#8f8170",
+        "rgba(60,40,20,0.1)",
+        "rgba(60,40,20,0.06)",
+        "rgba(60,40,20,0.03)",
+        "rgba(255,255,255,0.2)",
+        "#17110c"
+      ],
+      "grayShades": [
+        "#17110c",
+        "#231c16",
+        "#352b22",
+        "#4e4237",
+        "#6e6153",
+        "rgba(40,25,10,0.5)",
+        "rgba(40,25,10,0.35)",
+        "rgba(40,25,10,0.25)",
+        "rgba(40,25,10,0.18)",
+        "rgba(40,25,10,0.12)"
+      ],
+      "border": "#b08d57",
+      "borderWidth": 2,
+      "radius": 4
+    },
+    "chatInput": {
+      "texture": {
+        "src": "frames/linen.png",
+        "scale": 2
+      },
+      "background": "#e7e2d4",
+      "border": "#6e5a45",
+      "radius": 4,
+      "textColor": "#231c16"
+    },
+    "tooltip": {
+      "background": "#2c2018",
+      "border": "#b08d57",
+      "radius": 4,
+      "padding": [
+        4,
+        8,
+        4,
+        8
+      ],
+      "textColor": "#ece4d2"
+    },
+    "modal": {
+      "texture": {
+        "src": "frames/leather-dark.png",
+        "scale": 2
+      },
+      "background": "#33241a",
+      "border": "#2a1d14",
+      "borderWidth": 2,
+      "radius": 6,
+      "shadow": "rgba(0,0,0,0.85)"
+    },
+    "panel": {
+      "texture": {
+        "src": "frames/leather.png",
+        "scale": 2
+      },
+      "background": "#4a3527",
+      "border": "#2a1d14",
+      "borderWidth": 2,
+      "radius": 5,
+      "shadow": "rgba(0,0,0,0.6)"
+    },
+    "toolbar": {
+      "texture": {
+        "src": "frames/leather.png",
+        "scale": 2
+      },
+      "background": "#4a3527",
+      "border": "#2a1d14",
+      "borderWidth": 2,
+      "radius": 5,
+      "gap": 3,
+      "padding": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "shadow": "rgba(0,0,0,0.6)"
+    },
+    "sceneButton": {
+      "size": 28,
+      "iconSize": 16,
+      "background": "#5a4231",
+      "border": "#2a1d14",
+      "radius": 4,
+      "textColor": "#ece4d2",
+      "shadow": "rgba(0,0,0,0.5)",
+      "hover": {
+        "border": "#b08d57",
+        "textColor": "#fff8ea"
+      }
+    },
+    "sceneButtonActive": {
+      "background": "#7c5f36",
+      "border": "#d8bd8a",
+      "textColor": "#fff8ea",
+      "shadow": "rgba(176,141,87,0.5)"
+    },
+    "sceneTab": {
+      "background": "#4a3527",
+      "border": "#2a1d14",
+      "radius": 10,
+      "textColor": "#ece4d2",
+      "hover": {
+        "border": "#b08d57"
+      }
+    },
+    "sceneTabActive": {
+      "background": "#7c5f36",
+      "border": "#d8bd8a",
+      "radius": 10,
+      "textColor": "#fff8ea"
+    },
+    "hotbar": {
+      "background": "rgba(0,0,0,0)",
+      "border": "rgba(0,0,0,0)",
+      "gap": 0
+    },
+    "hotbarTabs": {
+      "texture": {
+        "src": "frames/leather-dark.png",
+        "scale": 2
+      },
+      "background": "#33241a",
+      "border": "rgba(0,0,0,0)",
+      "radius": 0,
+      "padding": [
+        3,
+        4,
+        0,
+        4
+      ],
+      "gap": 2
+    },
+    "hotbarTab": {
+      "textColor": "#cbbca5"
+    },
+    "hotbarTabActive": {
+      "background": "#7c5f36",
+      "radius": 3,
+      "textColor": "#fff8ea"
+    },
+    "hotbarRow": {
+      "texture": {
+        "src": "frames/leather-dark.png",
+        "scale": 2
+      },
+      "background": "#33241a",
+      "border": "#2a1d14",
+      "borderWidth": 2,
+      "radius": 4,
+      "padding": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "gap": 4,
+      "shadow": "rgba(0,0,0,0.6)"
+    },
+    "hotbarDivider": {
+      "hidden": true
+    },
+    "hotbarSlot": {
+      "background": "#2a1d14",
+      "border": "#5a4231",
+      "radius": 3,
+      "hover": {
+        "border": "#b08d57"
+      }
+    },
+    "hotbarSlotFilled": {
+      "border": "#b08d57"
+    },
+    "button": {
+      "background": "#d9ccb2",
+      "border": "#3a2a1f",
+      "radius": 14,
+      "textColor": "#231c16",
+      "fontWeight": 600,
+      "hover": {
+        "background": "#e8dcc4",
+        "border": "#b08d57",
+        "shadow": "rgba(176,141,87,0.45)"
+      }
+    },
+    "buttonFilled": {
+      "background": "#7c5f36",
+      "border": "#2a1d14",
+      "textColor": "#fff8ea",
+      "hover": {
+        "background": "#977645",
+        "border": "#d8bd8a",
+        "shadow": "rgba(176,141,87,0.5)"
+      }
+    },
+    "buttonDanger": {
+      "background": "#7a2a22",
+      "border": "#431611",
+      "textColor": "#fbe9e6",
+      "hover": {
+        "background": "#963a2b",
+        "border": "#431611",
+        "shadow": "rgba(122,42,34,0.45)"
+      }
+    },
+    "ctRowActive": {
+      "background": "rgba(176,141,87,0.25)",
+      "border": "#b08d57",
+      "radius": 3
+    },
+    "loadingCard": {
+      "texture": {
+        "src": "frames/linen.png",
+        "scale": 2
+      },
+      "background": "#e7e2d4",
+      "textColor": "#231c16",
+      "scheme": "light",
+      "tokens": {
+        "accent": "#6b4a2f",
+        "accent-glow": "rgba(107,74,47,0.25)",
+        "accent-subtle": "rgba(107,74,47,0.08)",
+        "bg": "rgba(0,0,0,0)",
+        "surface": "rgba(60,40,20,0.06)",
+        "surface-elev": "rgba(60,40,20,0.11)",
+        "text": "#231c16",
+        "text-dim": "#4e4237",
+        "text-muted": "rgba(78,66,55,0.75)",
+        "border": "#8f8170",
+        "border-strong": "#4e4237",
+        "divider": "rgba(60,40,20,0.2)",
+        "danger": "#7a2a22",
+        "success": "#3f6b2f",
+        "display-name": "#5a3a22"
+      },
+      "darkShades": [
+        "#231c16",
+        "#352b22",
+        "#4e4237",
+        "#6e6153",
+        "#8f8170",
+        "rgba(60,40,20,0.1)",
+        "rgba(60,40,20,0.06)",
+        "rgba(60,40,20,0.03)",
+        "rgba(255,255,255,0.2)",
+        "#17110c"
+      ],
+      "grayShades": [
+        "#17110c",
+        "#231c16",
+        "#352b22",
+        "#4e4237",
+        "#6e6153",
+        "rgba(40,25,10,0.5)",
+        "rgba(40,25,10,0.35)",
+        "rgba(40,25,10,0.25)",
+        "rgba(40,25,10,0.18)",
+        "rgba(40,25,10,0.12)"
+      ],
+      "border": "#2a1d14",
+      "borderWidth": 3,
+      "radius": 6
+    },
+    "pauseCard": {
+      "texture": {
+        "src": "frames/linen.png",
+        "scale": 2
+      },
+      "background": "#e7e2d4",
+      "textColor": "#231c16",
+      "scheme": "light",
+      "tokens": {
+        "accent": "#6b4a2f",
+        "accent-glow": "rgba(107,74,47,0.25)",
+        "accent-subtle": "rgba(107,74,47,0.08)",
+        "bg": "rgba(0,0,0,0)",
+        "surface": "rgba(60,40,20,0.06)",
+        "surface-elev": "rgba(60,40,20,0.11)",
+        "text": "#231c16",
+        "text-dim": "#4e4237",
+        "text-muted": "rgba(78,66,55,0.75)",
+        "border": "#8f8170",
+        "border-strong": "#4e4237",
+        "divider": "rgba(60,40,20,0.2)",
+        "danger": "#7a2a22",
+        "success": "#3f6b2f",
+        "display-name": "#5a3a22"
+      },
+      "darkShades": [
+        "#231c16",
+        "#352b22",
+        "#4e4237",
+        "#6e6153",
+        "#8f8170",
+        "rgba(60,40,20,0.1)",
+        "rgba(60,40,20,0.06)",
+        "rgba(60,40,20,0.03)",
+        "rgba(255,255,255,0.2)",
+        "#17110c"
+      ],
+      "grayShades": [
+        "#17110c",
+        "#231c16",
+        "#352b22",
+        "#4e4237",
+        "#6e6153",
+        "rgba(40,25,10,0.5)",
+        "rgba(40,25,10,0.35)",
+        "rgba(40,25,10,0.25)",
+        "rgba(40,25,10,0.18)",
+        "rgba(40,25,10,0.12)"
+      ],
+      "border": "#2a1d14",
+      "borderWidth": 3,
+      "radius": 6
+    },
+    "loadingLogo": {
+      "textColor": "#ffb347"
+    },
+    "pauseIcon": {
+      "background": "#7c5f36",
+      "border": "#d8bd8a",
+      "textColor": "#fff8ea",
+      "radius": 4
+    },
+    "sceneDecal": {
+      "textColor": "#ffb347"
+    }
+  },
+  "tags": {
+    "base": {
+      "radius": 10,
+      "border": "rgba(42,29,20,0.6)",
+      "textColor": "#fff8ea",
+      "fontWeight": 600,
+      "uppercase": true
+    },
+    "variants": {
+      "trait": {
+        "background": "#66462b"
+      },
+      "action": {
+        "background": "#7a2a22"
+      },
+      "magic": {
+        "background": "#46355e"
+      }
+    },
+    "default": "trait",
+    "match": {
+      "action": [
+        "attack",
+        "melee",
+        "ranged",
+        "action",
+        "maneuver",
+        "incidental"
+      ],
+      "magic": [
+        "arcana",
+        "divine",
+        "primal",
+        "runes",
+        "magic",
+        "* magic"
+      ]
+    }
+  },
+  "macroButtons": {
+    "style": {
+      "background": "#e2dacb",
+      "border": "#6e5a45",
+      "radius": 4,
+      "textColor": "#231c16",
+      "hover": {
+        "background": "#ece5d8",
+        "border": "#977645",
+        "textColor": "#231c16",
+        "shadow": "rgba(176,141,87,0.4)"
+      }
+    },
+    "layout": "stacked",
+    "row": true,
+    "kinds": {
+      "effect": {
+        "background": "#efe6d2",
+        "border": "#977645",
+        "textColor": "#231c16",
+        "hover": {
+          "background": "#f5eee0",
+          "border": "#b08d57",
+          "shadow": "rgba(176,141,87,0.4)"
+        },
+        "icon": "IconSparkles"
+      }
+    },
+    "variants": {
+      "effect": {
+        "background": "#efe6d2",
+        "border": "#977645",
+        "textColor": "#231c16",
+        "hover": {
+          "background": "#f5eee0",
+          "border": "#b08d57",
+          "shadow": "rgba(176,141,87,0.4)"
+        },
+        "icon": "IconSparkles"
+      },
+      "plain": {
+        "background": "#e2dacb",
+        "border": "#6e5a45",
+        "textColor": "#231c16",
+        "hover": {
+          "background": "#ece5d8",
+          "border": "#977645",
+          "shadow": "rgba(176,141,87,0.4)"
+        }
+      },
+      "check": {
+        "background": "#4a3527",
+        "border": "#2a1d14",
+        "textColor": "#ece4d2",
+        "hover": {
+          "background": "#5a4231",
+          "border": "#b08d57",
+          "shadow": "rgba(176,141,87,0.4)"
+        },
+        "icon": "ability"
+      },
+      "attack": {
+        "background": "#4a3527",
+        "border": "#2a1d14",
+        "textColor": "#ece4d2",
+        "hover": {
+          "background": "#5a4231",
+          "border": "#b08d57",
+          "shadow": "rgba(176,141,87,0.4)"
+        },
+        "icon": "proficiency"
+      },
+      "damage": {
+        "background": "#7a2a22",
+        "border": "#431611",
+        "textColor": "#fbe9e6",
+        "hover": {
+          "background": "#963a2b",
+          "border": "#431611",
+          "shadow": "rgba(122,42,34,0.45)"
+        },
+        "icon": "IconHeartBroken"
+      },
+      "strain": {
+        "background": "#34465e",
+        "border": "#1f2b3b",
+        "textColor": "#e6edf6",
+        "hover": {
+          "background": "#40567a",
+          "border": "#1f2b3b",
+          "shadow": "rgba(52,70,94,0.45)"
+        },
+        "icon": "IconHeartbeat"
+      },
+      "critical": {
+        "background": "#7c5f36",
+        "border": "#46351c",
+        "textColor": "#fff8ea",
+        "hover": {
+          "background": "#977645",
+          "border": "#46351c",
+          "shadow": "rgba(176,141,87,0.4)"
+        },
+        "icon": "triumph"
+      },
+      "healing": {
+        "background": "#45612a",
+        "border": "#233116",
+        "textColor": "#eef4e6",
+        "hover": {
+          "background": "#577a36",
+          "border": "#233116",
+          "shadow": "rgba(69,97,42,0.45)"
+        },
+        "icon": "IconHeartPlus"
+      }
+    },
+    "match": {
+      "effect": [
+        "apply_*"
+      ],
+      "check": [
+        "roll_*"
+      ],
+      "attack": [
+        "roll_guided_attack",
+        "*_attack"
+      ],
+      "critical": [
+        "roll_critical_*"
+      ],
+      "damage": [
+        "apply_damage",
+        "apply_blast_damage"
+      ],
+      "strain": [
+        "apply_strain"
+      ],
+      "healing": [
+        "apply_healing",
+        "roll_healing*"
+      ]
+    },
+    "buttons": {
+      "Apply_Damage": {
+        "icon": "IconHeartBroken",
+        "label": "Wounds"
+      },
+      "Apply_Blast_Damage": {
+        "icon": "IconBomb",
+        "label": "Blast"
+      },
+      "Apply_Strain": {
+        "icon": "IconHeartbeat",
+        "label": "Strain"
+      },
+      "Apply_Healing": {
+        "icon": "IconHeartPlus",
+        "label": "Heal"
+      },
+      "Roll_Guided_Attack": {
+        "icon": "proficiency",
+        "label": "Guided"
+      },
+      "Roll_Critical_Injury": {
+        "icon": "triumph",
+        "label": "Crit Injury"
+      },
+      "Roll_Critical_Hit": {
+        "icon": "triumph",
+        "label": "Crit Hit"
+      }
+    }
+  },
+  "sheetButtons": {
+    "base": {
+      "border": "#2a1d14",
+      "radius": 10,
+      "fontWeight": 600
+    },
+    "variants": {
+      "attack": {
+        "background": "#7a2a22",
+        "textColor": "#fbe9e6",
+        "hover": {
+          "background": "#963a2b"
+        }
+      },
+      "use": {
+        "background": "#4a3527",
+        "textColor": "#ece4d2",
+        "hover": {
+          "background": "#5a4231",
+          "border": "#b08d57"
+        }
+      },
+      "roll": {
+        "background": "#ece4d2",
+        "textColor": "#231c16",
+        "border": "#6e5a45",
+        "hover": {
+          "background": "#f5eee0",
+          "border": "#b08d57"
+        }
+      },
+      "critical": {
+        "background": "#7c5f36",
+        "textColor": "#fff8ea",
+        "hover": {
+          "background": "#977645"
+        }
+      }
+    }
+  },
+  "scrollbar": {
+    "thumb": "rgba(176,141,87,0.6)",
+    "thumbHover": "#b08d57"
+  }
+}

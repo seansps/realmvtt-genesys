@@ -1707,6 +1707,7 @@
     }
   ],
   "settings": {
+    "skin": "wayfarer",
     "otherSettings": {
       "advDisRolls": [],
       "advName": "",
